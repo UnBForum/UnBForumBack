@@ -9,7 +9,8 @@ services:
     depends_on:
       - db
     volumes:
-      - .:/app
+      - ./app:/app
+    command: sh -c "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
   db:
     image: postgres:15-alpine
@@ -17,8 +18,17 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - /var/cache/unbforum_postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=unbforum
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: unbforum-pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@unbforum.com
+      - PGADMIN_DEFAULT_PASSWORD=admin

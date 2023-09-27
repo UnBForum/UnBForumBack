@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "unbforum"
+version = "0.1.0"
+description = "API da aplicação UnBForum"
+authors = ["Herick Portugues <herick.portugues@gmail.com>, Lucas Boaventura <lucasxboaventura@hotmail.com>"]
+license = "GPLv3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.103.1"
+uvicorn = "^0.23.2"
+sqlalchemy = "^2.0.21"
+psycopg2-binary = "^2.9.7"
+pytest = "^7.4.2"
+alembic = "^1.12.0"
+python-decouple = "^3.8"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
