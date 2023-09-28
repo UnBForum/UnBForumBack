@@ -10,6 +10,8 @@ services:
       - db
     volumes:
       - .:/app
+    environment:
+      - DB_URL=postgresql+psycopg2://db/unbforum?user=postgres&password=postgres
     command: sh -c "uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
 
   db:
