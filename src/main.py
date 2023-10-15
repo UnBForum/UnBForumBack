@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from src.routes.user import user_router
+from src.routers import auth_router, user_router
 
 app = FastAPI()
 
@@ -10,4 +10,5 @@ def home():
     return {"hello": "world"}
 
 
+app.include_router(auth_router)
 app.include_router(user_router)

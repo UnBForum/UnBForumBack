@@ -22,11 +22,6 @@ class UserRetrieveSchema(BaseModel):
     updated_at: datetime
 
 
-class TokenData(BaseModel):
-    access_token: str
-    token_type: str
-
-
 class UserUpdateSchema(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
