@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
 
-from src.routes.deps import get_db_session
-from src.schemas.user import User, TokenData
-from src.db.models import User as UserModel
+from src.routes.deps import get_db_session, get_authenticated_user
+from src.schemas.user import UserCreateSchema, UserRetrieveSchema, UserUpdateSchema, TokenData
+from src.db.models import User
 from src.utils.jwt import create_access_token
 
 
@@ -19,8 +19,8 @@ user_router = APIRouter(prefix='/users')
 
 
 @user_router.post('/')
-def create_user(user: User, db_session: Session = Depends(get_db_session)):
-    user_on_db = UserModel(
+def create_user(user: UserCreateSchema, db_session: Session = Depends(get_db_session)):
+    user_on_db = User(
         password=crypt_context.hash(user.password),
         **user.model_dump(exclude=['id', 'password'])
     )
@@ -38,12 +38,12 @@ def create_user(user: User, db_session: Session = Depends(get_db_session)):
     return Response(status_code=status.HTTP_201_CREATED)
 
 
-@user_router.post('/login')
+@user_router.post('/login', response_model=TokenData)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db_session: Session = Depends(get_db_session)
-) -> TokenData:
-    user_on_db = db_session.query(UserModel).filter_by(email=form_data.username).one_or_none()
+):
+    user_on_db = db_session.query(User).filter_by(email=form_data.username).one_or_none()
 
     if not user_on_db or not crypt_context.verify(form_data.password, user_on_db.password):
         raise HTTPException(
@@ -60,3 +60,34 @@ def login(
             "token_type": "bearer"
         }
     )
+
+
+@user_router.get('/me', response_model=UserRetrieveSchema)
+def get_current_user(current_user: User = Depends(get_authenticated_user)):
+    return current_user
+
+
+@user_router.patch('/me', response_model=UserRetrieveSchema)
+def update_authenticated_user(
+    update_data: UserUpdateSchema,
+    db_session: Session = Depends(get_db_session),
+    current_user: User = Depends(get_authenticated_user)
+):
+    for field, value in update_data.model_dump().items():
+        if value is not None:
+            setattr(current_user, field, value)
+
+    db_session.commit()
+
+    return current_user
+
+
+@user_router.delete('/me')
+def delete_authenticated_user(
+    db_session: Session = Depends(get_db_session),
+    current_user: User = Depends(get_authenticated_user)
+):
+    db_session.delete(current_user)
+    db_session.commit()
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
