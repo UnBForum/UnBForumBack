@@ -97,7 +97,7 @@ class Comment(DbBaseModel):
     user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
 
     user = relationship('User', back_populates='comments')
-    files = relationship('File', back_populates='category')
+    files = relationship('File', back_populates='comment')
     topic = relationship('Topic', back_populates='comments')
 
 
@@ -106,8 +106,8 @@ class File(DbBaseModel):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     path = Column(String, nullable=False)
-    topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False),
-    category_id = Column(Integer, ForeignKey('categories.id', ondelete='CASCADE'), nullable=False),
+    topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False)
+    comment_id = Column(Integer, ForeignKey('comments.id', ondelete='CASCADE'), nullable=False)
 
     topic = relationship('Topic', back_populates='files')
-    category = relationship('Category', back_populates='files')
+    comment = relationship('Comment', back_populates='files')
