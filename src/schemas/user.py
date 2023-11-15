@@ -1,9 +1,10 @@
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, field_validator
 
 from src.utils.enumerations import Role
+from src.schemas.tag import TagRetrieveSchema
 
 
 class UserCreateSchema(BaseModel):
@@ -11,6 +12,14 @@ class UserCreateSchema(BaseModel):
     email: EmailStr
     role: Role = Field(default='member')
     password: str
+    tags: List[str] = []
+
+    @field_validator('email')
+    @classmethod
+    def validate_instutional_email(cls, email: str):
+        if not email.endswith('unb.br'):
+            raise ValueError('Email institucional inválido')
+        return email
 
 
 class UserRetrieveSchema(BaseModel):
@@ -18,10 +27,10 @@ class UserRetrieveSchema(BaseModel):
     name: str
     email: str
     role: Role
+    tags: List[TagRetrieveSchema]
     created_at: datetime
     updated_at: datetime
 
 
 class UserUpdateSchema(BaseModel):
     name: Optional[str] = None
-    email: Optional[EmailStr] = None
