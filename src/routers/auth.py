@@ -12,8 +12,6 @@ from src.utils.jwt import create_access_token
 
 
 crypt_context = CryptContext(schemes=['sha256_crypt'])
-
-
 auth_router = APIRouter(prefix='/auth', tags=['Auth'])
 
 
@@ -22,8 +20,7 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db_session: Session = Depends(get_db_session)
 ):
-    user_on_db = db_session.query(User).filter_by(email=form_data.username).one_or_none()
-
+    user_on_db = User.get_one(db_session, email=form_data.username)
     if not user_on_db or not crypt_context.verify(form_data.password, user_on_db.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -31,11 +28,7 @@ def login(
         )
 
     access_token = create_access_token(user_on_db.email)
-
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content={
-            "access_token": access_token,
-            "token_type": "bearer"
-        }
+        content=TokenData(access_token=access_token, token_type='bearer').model_dump()
     )

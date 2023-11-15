@@ -26,7 +26,7 @@ def verify_token_n_get_user(token: str, db_session: Session):
         raise credentials_exception
 
     user_email = data.get("sub")
-    user = db_session.query(User).filter_by(email=user_email).one_or_none()
+    user = User.get_one(db_session, email=user_email)
     if not user:
         raise credentials_exception
     return user
