@@ -30,8 +30,3 @@ def check_response_body(response):
     token_data = TokenData(**response.json())
     assert token_data.access_token is not None
     assert token_data.token_type == 'bearer'
-
-
-@then(parsers.parse('A resposta contém a mensagem de erro "{error_msg}"'))
-def check_error_message(response, error_msg):
-    assert response.json()['detail'] == error_msg
