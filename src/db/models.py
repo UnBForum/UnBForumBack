@@ -8,8 +8,8 @@ from src.utils.enumerations import Role
 USER_has_TAG = Table(
     'user_has_tag',
     DbBaseModel.metadata,
-    Column('user_id', Integer, ForeignKey('users.id'), nullable=False, primary_key=True),
-    Column('tag_id', Integer, ForeignKey('tags.id'), nullable=False, primary_key=True),
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True),
+    Column('tag_id', Integer, ForeignKey('tags.id', ondelete='CASCADE'), nullable=False, primary_key=True),
     Column('is_shown', Boolean, default=False, nullable=False),
 )
 
@@ -17,8 +17,8 @@ USER_has_TAG = Table(
 USER_rates_TOPIC = Table(
     'user_rates_topic',
     DbBaseModel.metadata,
-    Column('user_id', Integer, ForeignKey('users.id'), nullable=False, primary_key=True),
-    Column('topic_id', Integer, ForeignKey('topics.id'), nullable=False, primary_key=True),
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True),
+    Column('topic_id', Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False, primary_key=True),
     Column('rating', Integer, nullable=False),
 )
 
@@ -26,16 +26,16 @@ USER_rates_TOPIC = Table(
 USER_saves_TOPIC = Table(
     'user_saves_topic',
     DbBaseModel.metadata,
-    Column('user_id', Integer, ForeignKey('users.id'), nullable=False, primary_key=True),
-    Column('topic_id', Integer, ForeignKey('topics.id'), nullable=False, primary_key=True),
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True),
+    Column('topic_id', Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False, primary_key=True),
 )
 
 
 TOPIC_has_CATEGORY = Table(
     'topic_has_category',
     DbBaseModel.metadata,
-    Column('topic_id', Integer, ForeignKey('topics.id'), nullable=False, primary_key=True),
-    Column('category_id', Integer, ForeignKey('categories.id'), nullable=False, primary_key=True),
+    Column('topic_id', Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False, primary_key=True),
+    Column('category_id', Integer, ForeignKey('categories.id', ondelete='CASCADE'), nullable=False, primary_key=True),
 )
 
 
