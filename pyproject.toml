@@ -19,8 +19,12 @@ passlib = "^1.7.4"
 python-jose = "^3.3.0"
 pydantic = {extras = ["email"], version = "^2.4.2"}
 python-multipart = "^0.0.6"
+pytest-bdd = "^7.0.0"
+httpx = "^0.25.1"
+pytest-cov = "^4.1.0"
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
