@@ -53,3 +53,12 @@ class DbBaseModel(Base):
         except SQLAlchemyError as e:
             db_session.rollback()
             raise e
+
+    @classmethod
+    def delete_all(cls, db_session: Session):
+        try:
+            db_session.query(cls).delete()
+            db_session.commit()
+        except SQLAlchemyError as e:
+            db_session.rollback()
+            raise e

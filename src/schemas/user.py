@@ -1,15 +1,36 @@
-from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
+from datetime import datetime
+
+from pydantic import BaseModel, Field, EmailStr, field_validator
 
 from src.utils.enumerations import Role
+from src.schemas.tag import TagRetrieveSchema
 
 
-class User(BaseModel):
+class UserCreateSchema(BaseModel):
     name: str
     email: EmailStr
     role: Role = Field(default='member')
     password: str
+    tags: List[str] = []
+
+    @field_validator('email')
+    @classmethod
+    def validate_instutional_email(cls, email: str):
+        if not email.endswith('unb.br'):
+            raise ValueError('Email institucional inválido')
+        return email
 
 
-class TokenData(BaseModel):
-    access_token: str
-    token_type: str
+class UserRetrieveSchema(BaseModel):
+    id: int
+    name: str
+    email: str
+    role: Role
+    tags: List[TagRetrieveSchema]
+    created_at: datetime
+    updated_at: datetime
+
+
+class UserUpdateSchema(BaseModel):
+    name: Optional[str] = None
