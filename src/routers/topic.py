@@ -1,13 +1,13 @@
 from typing import List
 
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
-from fastapi import APIRouter, Depends, status, Response
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from fastapi import APIRouter, Depends, status, Response, Security
 from fastapi.exceptions import HTTPException
 
 from src.db.models import Topic, Category, User
 from src.schemas.topic import TopicCreateSchema, TopicRetrieveSchema, TopicUpdateSchema
-from src.routers.deps import get_db_session, get_authenticated_user
+from src.routers.deps import get_db_session, get_authenticated_user, check_permission
 from src.utils.enumerations import Role
 
 topic_router = APIRouter(prefix='/topics', tags=['Topic'])
@@ -84,6 +84,39 @@ def delete_topic(
         )
     topic.delete(db_session)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@topic_router.post('/{topic_id:int}/save')
+def save_topic(
+        topic_id: int,
+        db_session: Session = Depends(get_db_session),
+        current_user: User = Depends(get_authenticated_user)
+):
+    topic = get_topic_or_raise_exception(topic_id, db_session)
+    current_user.saved_topics.append(topic)
+    try:
+        current_user.save(db_session)
+        # return current_user
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Tópico já salvo',
+        )
+    return Response(status_code=status.HTTP_200_OK)
+
+
+@topic_router.post(
+    '/{topic_id:int}/fix',
+    response_model=TopicRetrieveSchema,
+    dependencies=[Security(check_permission, scopes=[Role.moderator, Role.administrator])]
+)
+def fix_topic(
+        topic_id: int,
+        db_session: Session = Depends(get_db_session)
+):
+    topic = get_topic_or_raise_exception(topic_id, db_session)
+    topic.update(db_session, is_fixed=True)
+    return topic
 
 
 def get_topic_or_raise_exception(topic_id: int, db_session: Session) -> Topic:
