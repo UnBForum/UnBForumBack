@@ -45,8 +45,8 @@ def db_session():
 
 @pytest.fixture()
 def get_token(request):
-    def _token(email='johndoe@unb.br'):
-        return create_access_token(email)
+    def _token(user):
+        return create_access_token(user)
     return _token
 
 @pytest.fixture()
