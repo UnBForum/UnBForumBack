@@ -2,12 +2,13 @@ from typing import List
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from fastapi import APIRouter, Depends, status, Response
+from fastapi import APIRouter, Depends, status, Response, Security
 from fastapi.exceptions import HTTPException
 
 from src.db.models import Category
 from src.schemas.category import CategoryCreateSchema, CategoryRetrieveSchema
-from src.routers.deps import get_db_session
+from src.routers.deps import get_db_session, check_permission
+from src.utils.enumerations import Role
 
 category_router = APIRouter(prefix='/categories', tags=['Category'])
 
@@ -16,11 +17,9 @@ category_router = APIRouter(prefix='/categories', tags=['Category'])
     '/',
     status_code=status.HTTP_201_CREATED,
     response_model=CategoryRetrieveSchema,
+    dependencies=[Security(check_permission, scopes=[Role.moderator, Role.administrator])],
 )
-def create_category(
-        category: CategoryCreateSchema,
-        db_session: Session = Depends(get_db_session)
-):
+def create_category(category: CategoryCreateSchema, db_session: Session = Depends(get_db_session)):
     category_on_db = Category(**category.model_dump())
     try:
         category_on_db.save(db_session)
@@ -44,7 +43,11 @@ def get_one_category(category_id: int, db_session: Session = Depends(get_db_sess
     return category
 
 
-@category_router.patch('/{category_id}', response_model=CategoryRetrieveSchema)
+@category_router.patch(
+    '/{category_id:int}',
+    response_model=CategoryRetrieveSchema,
+    dependencies=[Security(check_permission, scopes=[Role.moderator, Role.administrator])],
+)
 def update_category(
         category_id: int,
         category: CategoryCreateSchema,
@@ -55,7 +58,9 @@ def update_category(
     return category_on_db
 
 
-@category_router.delete('/{category_id}')
+@category_router.delete(
+    '/{category_id:int}',
+    dependencies=[Security(check_permission, scopes=[Role.moderator, Role.administrator])])
 def delete_category(
         category_id: int,
         db_session: Session = Depends(get_db_session),
