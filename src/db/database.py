@@ -22,9 +22,9 @@ class DbBaseModel(Base):
             raise e
 
     @classmethod
-    def get_all(cls, db_session: Session):
+    def get_all(cls, db_session: Session, **kwargs):
         try:
-            return db_session.query(cls).all()
+            return db_session.query(cls).filter_by(**kwargs).all()
         except SQLAlchemyError as e:
             db_session.rollback()
             raise e
