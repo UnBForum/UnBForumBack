@@ -17,6 +17,6 @@ Feature: Login
         And A resposta contém a mensagem de erro "Email ou senha inválidos"
 
     Scenario: Login com senha inválida
-        When O endpoint "POST /auth/login" é chamado com o email "joendoe@unb.br" e senha "senha_invalida"
+        When O endpoint "POST /auth/login" é chamado com o email "johndoe@unb.br" e senha "senha_invalida"
         Then O status da resposta é "401"
         And A resposta contém a mensagem de erro "Email ou senha inválidos"

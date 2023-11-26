@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.routers import auth_router, user_router, topic_router, category_router, comment_router
+from src.routers import auth_router, user_router, topic_router, category_router, comment_router, tag_router
+
 
 app = FastAPI()
 
@@ -13,7 +14,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.get('/')
 def home():
     return {"hello": "world"}
@@ -24,3 +24,4 @@ app.include_router(user_router)
 app.include_router(topic_router)
 app.include_router(category_router)
 app.include_router(comment_router)
+app.include_router(tag_router)

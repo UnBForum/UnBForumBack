@@ -3,14 +3,19 @@ Feature: Criar usuário
     Quero criar uma conta na aplicação,
     Para que eu possa interagir com os tópicos.
 
+    Eu, como UnBFórum,
+    Desejo validar o email institucional do usuário cadastrado,
+    Para garantir a autenticidade do email e do domínio
+
     Scenario Outline: Criação com sucesso
         Given Um usuário visitante
         When O endpoint "POST /users" é chamado com os dados <email>, <password>, <tags>
         Then O status da resposta é "201"
         And A resposta contém o usuário criado com o <email>
         Examples:
-            | email          | password    | tags                              |
-            | johndoe@unb.br | teste_senha | Estudante, Engenharia de Software |
+            | email                | password    | tags                              |
+            | johndoe@unb.br       | teste_senha | Estudante, Engenharia de Software |
+            | johndoe@aluno.unb.br | teste_senha | Engenharia Aeroespacial           |
 
     Scenario Outline: Criação com tag inexistente
         Given Um usuário visitante
