@@ -3,7 +3,7 @@ from pytest_bdd import given, then, parsers
 from passlib.context import CryptContext
 
 from src.db.connection import LocalSession
-from src.db.models import User, Tag
+from src.db.models import User, Tag, Category
 from src.utils.jwt import create_access_token
 
 crypt_context = CryptContext(schemes=['sha256_crypt'])
@@ -23,6 +23,7 @@ def _create_default_tags(db_session):
 def _clean_database(db_session):
     Tag.delete_all(db_session)
     User.delete_all(db_session)
+    Category.delete_all(db_session)
 
 # Hooks
 
@@ -45,8 +46,8 @@ def db_session():
 
 @pytest.fixture()
 def get_token(request):
-    def _token(email='johndoe@unb.br'):
-        return create_access_token(email)
+    def _token(user):
+        return create_access_token(user)
     return _token
 
 @pytest.fixture()
@@ -66,6 +67,19 @@ def create_user(db_session, request):
 
     request.addfinalizer(lambda: User.delete_all(db_session))
 
+
+@pytest.fixture()
+def create_category(db_session, request):
+    def _create_category(name='TCC', color='#10B981'):
+        category = Category(name=name, color=color)
+        category.save(db_session)
+
+        return category
+
+    yield _create_category
+
+    request.addfinalizer(lambda: Category.delete_all(db_session))
+
 # Common Steps
 
 @given('Um usuário visitante')
@@ -76,11 +90,11 @@ def given_a_guest_user():
 def given_a_authenticated_user(create_user):
     return create_user(role='member')
 
-@given('Um usuário autenticado (moderator)', target_fixture='user')
+@given('Um usuário autenticado (moderador)', target_fixture='user')
 def given_a_authenticated_admin(create_user):
     return create_user(role='moderator')
 
-@given('Um usuário autenticado (administrator)', target_fixture='user')
+@given('Um usuário autenticado (administrador)', target_fixture='user')
 def given_a_authenticated_admin(create_user):
     return create_user(role='administrator')
 

@@ -27,7 +27,7 @@ def login(
             detail='Email ou senha inválidos'
         )
 
-    access_token = create_access_token(user_on_db.email)
+    access_token = create_access_token(user_on_db)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=TokenData(access_token=access_token, token_type='bearer').model_dump()
