@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Enum, Table, ForeignKey, Boolean
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Enum, Table, ForeignKey, Boolean, DateTime
 
 from src.db.database import DbBaseModel
 from src.utils.enumerations import Role
@@ -11,6 +12,8 @@ USER_has_TAG = Table(
     Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True),
     Column('tag_id', Integer, ForeignKey('tags.id', ondelete='CASCADE'), nullable=False, primary_key=True),
     Column('is_shown', Boolean, default=False, nullable=False),
+    Column('created_at', DateTime(timezone=True), default=func.now()),
+    Column('updated_at', DateTime(timezone=True), default=func.now(), onupdate=func.now()),
 )
 
 
@@ -20,6 +23,8 @@ USER_rates_TOPIC = Table(
     Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True),
     Column('topic_id', Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False, primary_key=True),
     Column('rating', Integer, nullable=False),
+    Column('created_at', DateTime(timezone=True), default=func.now()),
+    Column('updated_at', DateTime(timezone=True), default=func.now(), onupdate=func.now()),
 )
 
 
@@ -28,6 +33,8 @@ USER_saves_TOPIC = Table(
     DbBaseModel.metadata,
     Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True),
     Column('topic_id', Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False, primary_key=True),
+    Column('created_at', DateTime(timezone=True), default=func.now()),
+    Column('updated_at', DateTime(timezone=True), default=func.now(), onupdate=func.now()),
 )
 
 
@@ -36,6 +43,8 @@ TOPIC_has_CATEGORY = Table(
     DbBaseModel.metadata,
     Column('topic_id', Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False, primary_key=True),
     Column('category_id', Integer, ForeignKey('categories.id', ondelete='CASCADE'), nullable=False, primary_key=True),
+    Column('created_at', DateTime(timezone=True), default=func.now()),
+    Column('updated_at', DateTime(timezone=True), default=func.now(), onupdate=func.now()),
 )
 
 
@@ -50,6 +59,7 @@ class User(DbBaseModel):
 
     tags = relationship('Tag', secondary=USER_has_TAG, back_populates='users')
     topics = relationship('Topic', back_populates='user')
+    saved_topics = relationship('Topic', secondary=USER_saves_TOPIC, back_populates='saved_by')
     comments = relationship('Comment', back_populates='user')
 
 
@@ -75,6 +85,7 @@ class Topic(DbBaseModel):
     user = relationship('User', back_populates='topics')
     comments = relationship('Comment', back_populates='topic')
     categories = relationship('Category', secondary=TOPIC_has_CATEGORY, back_populates='topics')
+    saved_by = relationship('User', secondary=USER_saves_TOPIC, back_populates='saved_topics')
 
 
 class Category(DbBaseModel):
@@ -105,9 +116,11 @@ class File(DbBaseModel):
     __tablename__ = 'files'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    path = Column(String, nullable=False)
-    topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False)
-    comment_id = Column(Integer, ForeignKey('comments.id', ondelete='CASCADE'), nullable=False)
+    name = Column(String, nullable=False)
+    content_type = Column(String, nullable=False)
+    upload_path = Column(String, nullable=False)
+    topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=True)
+    comment_id = Column(Integer, ForeignKey('comments.id', ondelete='CASCADE'), nullable=True)
 
     topic = relationship('Topic', back_populates='files')
     comment = relationship('Comment', back_populates='files')
