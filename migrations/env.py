@@ -12,7 +12,7 @@ from src.db.models import DbBaseModel
 # access to the values within the .ini file in use.
 config = context.config
 
-DB_URL = config_decouple('DB_URL')
+DB_URL = config_decouple('DATABASE_URL')
 config.set_main_option('sqlalchemy.url', DB_URL)
 
 # Interpret the config file for Python logging.

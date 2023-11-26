@@ -11,7 +11,7 @@ services:
     volumes:
       - .:/app
     environment:
-      - DB_URL=postgresql+psycopg2://postgres:postgres@db/unbforum
+      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@db/unbforum
       - SECRET_KEY=ae41b99a04f6082a403515dd33aa43ec69e0603be5c412448d4acdd38143d457
       - ALGORITHM=HS256
     command: sh -c "uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
