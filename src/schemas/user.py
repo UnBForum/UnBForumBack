@@ -16,10 +16,15 @@ class UserCreateSchema(BaseModel):
 
     @field_validator('email')
     @classmethod
-    def validate_instutional_email(cls, email: str):
+    def validate_institutional_email(cls, email: str):
         if not email.endswith('unb.br'):
             raise ValueError('Email institucional inválido')
         return email
+
+
+class UserChangePasswordSchema(BaseModel):
+    current_password: str
+    new_password: str
 
 
 class UserRetrieveSchema(BaseModel):
