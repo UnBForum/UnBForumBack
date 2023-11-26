@@ -13,7 +13,7 @@ scenarios('../../features/user/test_current_user.feature')
     target_fixture='response'
 )
 def get_current_user_request(user, get_token):
-    headers = {'Authorization': f'Bearer {get_token(user.email)}'}
+    headers = {'Authorization': f'Bearer {get_token(user)}'}
     response = client.get('/users/me', headers=headers)
     return response
 
@@ -32,7 +32,7 @@ def get_incorrect_user_request():
 )
 def update_current_user_request(user, get_token):
     data = {'name': 'Novo Nome de Usuário'}
-    headers = {'Authorization': f'Bearer {get_token(user.email)}'}
+    headers = {'Authorization': f'Bearer {get_token(user)}'}
     response = client.patch('/users/me', json=data, headers=headers)
     return response
 
@@ -41,7 +41,7 @@ def update_current_user_request(user, get_token):
     target_fixture='response'
 )
 def delete_current_user_request(user, get_token):
-    headers = {'Authorization': f'Bearer {get_token(user.email)}'}
+    headers = {'Authorization': f'Bearer {get_token(user)}'}
     response = client.delete('/users/me', headers=headers)
     return response
 
