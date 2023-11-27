@@ -38,8 +38,8 @@ def pytest_bdd_after_scenario(request, feature, scenario):
 
 @pytest.fixture()
 def db_session():
+    session = LocalSession()
     try:
-        session = LocalSession()
         yield session
     finally:
         session.close()
