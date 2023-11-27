@@ -4,9 +4,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from fastapi import APIRouter, Depends, status, Response, Security
 from fastapi.exceptions import HTTPException
+from fastapi_filter import FilterDepends
 
-from src.db.models import Topic, Category, User
-from src.schemas.topic import TopicCreateSchema, TopicRetrieveSchema, TopicUpdateSchema
+from src.db.models import Topic, Category, User, TOPIC_has_CATEGORY
+from src.schemas.topic import TopicCreateSchema, TopicRetrieveSchema, TopicUpdateSchema, TopicFilterSchema
 from src.routers.deps import get_db_session, get_authenticated_user, check_permission
 from src.utils.enumerations import Role
 
@@ -25,7 +26,7 @@ def create_topic(
         if not category_on_db:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f'Categoria {category_on_db.name} não existe',
+                detail=f'Erro ao criar o tópico. Categoria não existe',
             )
         topic_on_db.categories.append(category_on_db)
     # for file in topic.files:
@@ -42,8 +43,14 @@ def create_topic(
 
 
 @topic_router.get('/', response_model=List[TopicRetrieveSchema])
-def get_all_topics(db_session: Session = Depends(get_db_session)):
-    topics = Topic.get_all(db_session)
+def get_all_topics(
+        topic_filter: TopicFilterSchema = FilterDepends(TopicFilterSchema),
+        db_session: Session = Depends(get_db_session)
+):
+    query = db_session.query(Topic).join(TOPIC_has_CATEGORY).join(Category)
+    query = topic_filter.filter(query)
+    query = topic_filter.sort(query)
+    topics = query.all()
     return topics
 
 
@@ -61,7 +68,7 @@ def update_topic(
         current_user: User = Depends(get_authenticated_user)
 ):
     topic_on_db = get_topic_or_raise_exception(topic_id, db_session)
-    if topic_on_db.user_id != current_user.id and current_user.role not in (Role.moderator, Role.administrator):
+    if topic_on_db.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='Você não tem permissão para realizar esta ação',
