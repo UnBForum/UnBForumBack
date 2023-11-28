@@ -10,7 +10,7 @@ ALGORITHM = config('ALGORITHM')
 
 
 def create_access_token(user: User):
-    data = {"sub": user.email, "scopes": [user.role]}
+    data = {"sub": user.email, "scopes": [user.role], "name": user.name}
     return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
 
 
