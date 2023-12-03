@@ -8,6 +8,7 @@ from fastapi_filter.contrib.sqlalchemy import Filter
 
 from src.db.models import Topic
 from src.schemas.category import CategoryRetrieveSchema, CategoryFilterSchema
+from src.schemas.comment import CommentRetrieveSchema
 from src.schemas.user import UserRetrieveSchema
 
 
@@ -18,18 +19,22 @@ class TopicCreateSchema(BaseModel):
     files: List[str] = []
     categories: List[int] = []
 
-
 class TopicRetrieveSchema(BaseModel):
     id: int
     title: str
     content: str
     is_fixed: bool
-    user: UserRetrieveSchema
+    author: UserRetrieveSchema
+    rating: int
+    comments_count: int
     # files: List[File]
     categories: List[CategoryRetrieveSchema]
     created_at: datetime
     updated_at: datetime
-    # comments: List[CommentRetrieveSchema]
+
+
+class TopicRetrieveExtendedSchema(TopicRetrieveSchema):
+    comments: List[CommentRetrieveSchema]
 
 
 class TopicUpdateSchema(BaseModel):
@@ -40,6 +45,7 @@ class TopicUpdateSchema(BaseModel):
 class TopicFilterSchema(Filter):
     search: Optional[str] = Field(Query(None, description='Pesquisa por título ou conteúdo'))
     order_by: Optional[List[str]] = ['-created_at']
+    is_fixed: Optional[bool] = None
     category: Optional[CategoryFilterSchema] = FilterDepends(with_prefix('category', CategoryFilterSchema))
 
     class Constants(Filter.Constants):
