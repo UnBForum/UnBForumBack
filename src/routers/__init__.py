@@ -4,3 +4,4 @@ from .topic import topic_router
 from .category import category_router
 from .comment import comment_router
 from .tag import tag_router
+from .file import file_router
