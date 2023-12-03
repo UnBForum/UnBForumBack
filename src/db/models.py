@@ -17,17 +17,6 @@ USER_has_TAG = Table(
 )
 
 
-USER_rates_TOPIC = Table(
-    'user_rates_topic',
-    DbBaseModel.metadata,
-    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True),
-    Column('topic_id', Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False, primary_key=True),
-    Column('rating', Integer, nullable=False),
-    Column('created_at', DateTime(timezone=True), default=func.now()),
-    Column('updated_at', DateTime(timezone=True), default=func.now(), onupdate=func.now()),
-)
-
-
 USER_saves_TOPIC = Table(
     'user_saves_topic',
     DbBaseModel.metadata,
@@ -48,6 +37,17 @@ TOPIC_has_CATEGORY = Table(
 )
 
 
+class UserRatesTopic(DbBaseModel):
+    __tablename__ = 'user_rates_topic'
+
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+    topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+    rating = Column(Integer, nullable=False)
+
+    user = relationship('User', back_populates='rated_topics')
+    topic = relationship('Topic', back_populates='rated_by')
+
+
 class User(DbBaseModel):
     __tablename__ = 'users'
 
@@ -59,6 +59,7 @@ class User(DbBaseModel):
 
     tags = relationship('Tag', secondary=USER_has_TAG, back_populates='users')
     topics = relationship('Topic', back_populates='user')
+    rated_topics = relationship('UserRatesTopic', back_populates='user')
     saved_topics = relationship('Topic', secondary=USER_saves_TOPIC, back_populates='saved_by')
     comments = relationship('Comment', back_populates='user')
 
@@ -82,10 +83,25 @@ class Topic(DbBaseModel):
     user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
 
     files = relationship('File', back_populates='topic')
-    user = relationship('User', back_populates='topics')
+    author = relationship('User', back_populates='topics')
     comments = relationship('Comment', back_populates='topic')
     categories = relationship('Category', secondary=TOPIC_has_CATEGORY, back_populates='topics')
     saved_by = relationship('User', secondary=USER_saves_TOPIC, back_populates='saved_topics')
+    rated_by = relationship('UserRatesTopic', back_populates='topic')
+
+    @property
+    def rating(self) -> int:
+        return sum([user_rating.rating for user_rating in self.rated_by])
+
+    @property
+    def comments_count(self) -> int:
+        return len(self.comments)
+
+    def has_user_liked_topic(self, user_id: int) -> bool:
+        return user_id in [user_rating.user_id for user_rating in self.rated_by if user_rating.rating == 1]
+
+    def has_user_disliked_topic(self, user_id: int) -> bool:
+        return user_id in [user_rating.user_id for user_rating in self.rated_by if user_rating.rating == -1]
 
 
 class Category(DbBaseModel):
