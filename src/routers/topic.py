@@ -6,8 +6,9 @@ from fastapi import APIRouter, Depends, status, Response, Security
 from fastapi.exceptions import HTTPException
 from fastapi_filter import FilterDepends
 
-from src.db.models import Topic, Category, User, TOPIC_has_CATEGORY
-from src.schemas.topic import TopicCreateSchema, TopicRetrieveSchema, TopicUpdateSchema, TopicFilterSchema
+from src.db.models import Topic, Category, User, TOPIC_has_CATEGORY, UserRatesTopic
+from src.schemas.topic import (TopicCreateSchema, TopicRetrieveSchema, TopicRetrieveExtendedSchema,
+                               TopicUpdateSchema, TopicFilterSchema, TopicRatingSchema)
 from src.routers.deps import get_db_session, get_authenticated_user, check_permission
 from src.utils.enumerations import Role
 
@@ -54,7 +55,7 @@ def get_all_topics(
     return topics
 
 
-@topic_router.get('/{topic_id:int}', response_model=TopicRetrieveSchema)
+@topic_router.get('/{topic_id:int}', response_model=TopicRetrieveExtendedSchema)
 def get_one_topic(topic_id: int, db_session: Session = Depends(get_db_session)):
     topic = get_topic_or_raise_exception(topic_id, db_session)
     return topic
@@ -110,6 +111,59 @@ def save_topic(
             detail='Tópico já salvo',
         )
     return Response(status_code=status.HTTP_200_OK)
+
+
+@topic_router.post('/{topic_id:int}/upvote', response_model=TopicRatingSchema)
+def upvote_topic(
+        topic_id: int,
+        db_session: Session = Depends(get_db_session),
+        current_user: User = Depends(get_authenticated_user)
+):
+    topic = get_topic_or_raise_exception(topic_id, db_session)
+
+    if topic.user_has_liked_topic(db_session, current_user.id):
+        # Se o usuário já havia avaliado o tópico positivamente, remove a avaliação
+        user_rating = UserRatesTopic.get_one(db_session, user_id=current_user.id, topic_id=topic_id)
+        user_rating.delete(db_session)
+    else:
+        # Se o usuário não havia avaliado o tópico positivamente, adiciona a avaliação
+        user_rating = UserRatesTopic(user_id=current_user.id, topic_id=topic_id, rating=1)
+        try:
+            user_rating.create_or_update(db_session)
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Erro ao avaliar tópico',
+            )
+
+    return topic
+
+
+@topic_router.post('/{topic_id:int}/downvote', response_model=TopicRatingSchema)
+def downvote_topic(
+        topic_id: int,
+        db_session: Session = Depends(get_db_session),
+        current_user: User = Depends(get_authenticated_user)
+):
+    topic = get_topic_or_raise_exception(topic_id, db_session)
+
+    if topic.user_has_disliked_topic(db_session, current_user.id):
+        # Se o usuário já havia avaliado o tópico negativamente, remove a avaliação
+        user_rating = UserRatesTopic.get_one(db_session, user_id=current_user.id, topic_id=topic_id)
+        user_rating.delete(db_session)
+    else:
+        # Se o usuário não havia avaliado o tópico negativamente, adiciona a avaliação
+        user_rating = UserRatesTopic(user_id=current_user.id, topic_id=topic_id, rating=-1)
+        try:
+            user_rating.create_or_update(db_session)
+
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Erro ao avaliar tópico',
+            )
+
+    return topic
 
 
 @topic_router.post(

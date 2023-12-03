@@ -1,3 +1,4 @@
+from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, Enum, Table, ForeignKey, Boolean, DateTime
@@ -12,17 +13,6 @@ USER_has_TAG = Table(
     Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True),
     Column('tag_id', Integer, ForeignKey('tags.id', ondelete='CASCADE'), nullable=False, primary_key=True),
     Column('is_shown', Boolean, default=False, nullable=False),
-    Column('created_at', DateTime(timezone=True), default=func.now()),
-    Column('updated_at', DateTime(timezone=True), default=func.now(), onupdate=func.now()),
-)
-
-
-USER_rates_TOPIC = Table(
-    'user_rates_topic',
-    DbBaseModel.metadata,
-    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True),
-    Column('topic_id', Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False, primary_key=True),
-    Column('rating', Integer, nullable=False),
     Column('created_at', DateTime(timezone=True), default=func.now()),
     Column('updated_at', DateTime(timezone=True), default=func.now(), onupdate=func.now()),
 )
@@ -48,6 +38,17 @@ TOPIC_has_CATEGORY = Table(
 )
 
 
+class UserRatesTopic(DbBaseModel):
+    __tablename__ = 'user_rates_topic'
+
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+    topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+    rating = Column(Integer, nullable=False)
+
+    user = relationship('User', back_populates='rated_topics')
+    topic = relationship('Topic', back_populates='rated_by')
+
+
 class User(DbBaseModel):
     __tablename__ = 'users'
 
@@ -58,7 +59,8 @@ class User(DbBaseModel):
     password = Column(String, nullable=False)
 
     tags = relationship('Tag', secondary=USER_has_TAG, back_populates='users')
-    topics = relationship('Topic', back_populates='user')
+    topics = relationship('Topic', back_populates='author')
+    rated_topics = relationship('UserRatesTopic', back_populates='user')
     saved_topics = relationship('Topic', secondary=USER_saves_TOPIC, back_populates='saved_by')
     comments = relationship('Comment', back_populates='user')
 
@@ -82,10 +84,27 @@ class Topic(DbBaseModel):
     user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
 
     files = relationship('File', back_populates='topic')
-    user = relationship('User', back_populates='topics')
+    author = relationship('User', back_populates='topics')
     comments = relationship('Comment', back_populates='topic')
     categories = relationship('Category', secondary=TOPIC_has_CATEGORY, back_populates='topics')
     saved_by = relationship('User', secondary=USER_saves_TOPIC, back_populates='saved_topics')
+    rated_by = relationship('UserRatesTopic', back_populates='topic')
+
+    @property
+    def rating(self) -> int:
+        return sum([user_rating.rating for user_rating in self.rated_by])
+
+    @property
+    def comments_count(self) -> int:
+        return len(self.comments)
+
+    def user_has_liked_topic(self, db_session: Session, user_id: int) -> bool:
+        return bool(db_session.query(UserRatesTopic).filter_by(
+            user_id=user_id, topic_id=self.id, rating=1).one_or_none())
+
+    def user_has_disliked_topic(self, db_session: Session, user_id: int) -> bool:
+        return bool(db_session.query(UserRatesTopic).filter_by(
+            user_id=user_id, topic_id=self.id, rating=-1).one_or_none())
 
 
 class Category(DbBaseModel):

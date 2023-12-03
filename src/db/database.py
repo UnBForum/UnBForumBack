@@ -37,6 +37,14 @@ class DbBaseModel(Base):
             db_session.rollback()
             raise e
 
+    def create_or_update(self, db_session: Session):
+        try:
+            db_session.merge(self)
+            db_session.commit()
+        except SQLAlchemyError as e:
+            db_session.rollback()
+            raise e
+
     def update(self, db_session: Session, **kwargs):
         try:
             for attr, value in kwargs.items():
@@ -52,6 +60,7 @@ class DbBaseModel(Base):
             db_session.commit()
         except SQLAlchemyError as e:
             db_session.rollback()
+            print(e)
             raise e
 
     @classmethod
