@@ -1,3 +1,4 @@
+from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, Enum, Table, ForeignKey, Boolean, DateTime
@@ -58,7 +59,7 @@ class User(DbBaseModel):
     password = Column(String, nullable=False)
 
     tags = relationship('Tag', secondary=USER_has_TAG, back_populates='users')
-    topics = relationship('Topic', back_populates='user')
+    topics = relationship('Topic', back_populates='author')
     rated_topics = relationship('UserRatesTopic', back_populates='user')
     saved_topics = relationship('Topic', secondary=USER_saves_TOPIC, back_populates='saved_by')
     comments = relationship('Comment', back_populates='user')
@@ -97,11 +98,13 @@ class Topic(DbBaseModel):
     def comments_count(self) -> int:
         return len(self.comments)
 
-    def has_user_liked_topic(self, user_id: int) -> bool:
-        return user_id in [user_rating.user_id for user_rating in self.rated_by if user_rating.rating == 1]
+    def user_has_liked_topic(self, db_session: Session, user_id: int) -> bool:
+        return bool(db_session.query(UserRatesTopic).filter_by(
+            user_id=user_id, topic_id=self.id, rating=1).one_or_none())
 
-    def has_user_disliked_topic(self, user_id: int) -> bool:
-        return user_id in [user_rating.user_id for user_rating in self.rated_by if user_rating.rating == -1]
+    def user_has_disliked_topic(self, db_session: Session, user_id: int) -> bool:
+        return bool(db_session.query(UserRatesTopic).filter_by(
+            user_id=user_id, topic_id=self.id, rating=-1).one_or_none())
 
 
 class Category(DbBaseModel):

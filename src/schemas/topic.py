@@ -37,6 +37,10 @@ class TopicRetrieveExtendedSchema(TopicRetrieveSchema):
     comments: List[CommentRetrieveSchema]
 
 
+class TopicRatingSchema(BaseModel):
+    rating: int
+
+
 class TopicUpdateSchema(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
