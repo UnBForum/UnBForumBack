@@ -19,8 +19,8 @@ oauth_scheme = OAuth2PasswordBearer(
 
 
 def get_db_session():
+    session = LocalSession()
     try:
-        session = LocalSession()
         yield session
     finally:
         session.close()
