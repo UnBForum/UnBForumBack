@@ -10,14 +10,16 @@ from src.db.models import Topic
 from src.schemas.category import CategoryRetrieveSchema, CategoryFilterSchema
 from src.schemas.comment import CommentRetrieveSchema
 from src.schemas.user import UserRetrieveSchema
+from src.schemas.file import FileRetrieveSchema
 
 
 class TopicCreateSchema(BaseModel):
     title: str
     content: str
     is_fixed: bool = False
-    files: List[str] = []
+    files: List[int] = []
     categories: List[int] = []
+
 
 class TopicRetrieveSchema(BaseModel):
     id: int
@@ -27,7 +29,7 @@ class TopicRetrieveSchema(BaseModel):
     author: UserRetrieveSchema
     rating: int
     comments_count: int
-    # files: List[File]
+    files: List[FileRetrieveSchema]
     categories: List[CategoryRetrieveSchema]
     created_at: datetime
     updated_at: datetime

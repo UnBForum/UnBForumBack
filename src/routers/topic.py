@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, status, Response, Security
 from fastapi.exceptions import HTTPException
 from fastapi_filter import FilterDepends
 
-from src.db.models import Topic, Category, User, TOPIC_has_CATEGORY, UserRatesTopic
+from src.db.models import Topic, Category, User, File, TOPIC_has_CATEGORY, UserRatesTopic
 from src.schemas.topic import (TopicCreateSchema, TopicRetrieveSchema, TopicRetrieveExtendedSchema,
                                TopicUpdateSchema, TopicFilterSchema, TopicRatingSchema)
 from src.routers.deps import get_db_session, get_authenticated_user, check_permission
@@ -30,9 +30,14 @@ def create_topic(
                 detail=f'Erro ao criar o tópico. Categoria não existe',
             )
         topic_on_db.categories.append(category_on_db)
-    # for file in topic.files:
-    #     file_on_db = File(name=file)
-    #     topic_on_db.files.append(file_on_db)
+    for file_id in topic.files:
+        file_on_db = File.get_one(db_session, id=file_id)
+        if not file_on_db:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'Erro ao criar o tópico. Arquivo não existe',
+            )
+        topic_on_db.files.append(file_on_db)
     try:
         topic_on_db.save(db_session)
         return topic_on_db
