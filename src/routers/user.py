@@ -8,6 +8,7 @@ from passlib.context import CryptContext
 
 from src.routers.deps import get_db_session, get_authenticated_user, check_permission
 from src.schemas.user import UserCreateSchema, UserRetrieveSchema, UserUpdateSchema, UserChangePasswordSchema
+from src.schemas.topic import TopicRetrieveSchema
 from src.db.models import User, Tag
 from src.utils.enumerations import Role
 
@@ -102,3 +103,8 @@ def delete_current_user(
 ):
     current_user.delete(db_session)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@user_router.get('/me/topics', response_model=List[TopicRetrieveSchema])
+def get_current_user_topics(current_user: User = Depends(get_authenticated_user)):
+    return current_user.topics
