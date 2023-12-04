@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func, select
+from sqlalchemy.orm import relationship, column_property
 from sqlalchemy import Column, Integer, String, Enum, Table, ForeignKey, Boolean, DateTime
 
 from src.db.database import DbBaseModel
@@ -74,6 +74,20 @@ class Tag(DbBaseModel):
     users = relationship('User', secondary=USER_has_TAG, back_populates='tags')
 
 
+class Comment(DbBaseModel):
+    __tablename__ = 'comments'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    content = Column(String, nullable=False)
+    is_fixed = Column(Boolean, default=False, nullable=False)
+    topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+
+    user = relationship('User', back_populates='comments')
+    files = relationship('File', back_populates='comment')
+    topic = relationship('Topic', back_populates='comments')
+
+
 class Topic(DbBaseModel):
     __tablename__ = 'topics'
 
@@ -82,6 +96,18 @@ class Topic(DbBaseModel):
     content = Column(String, nullable=False)
     is_fixed = Column(Boolean, default=False, nullable=False)
     user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+    rating = column_property(
+        select(func.coalesce(func.sum(UserRatesTopic.rating), 0))
+        .filter(UserRatesTopic.topic_id == id)
+        .correlate_except(UserRatesTopic)
+        .scalar_subquery()
+    )
+    comments_count = column_property(
+        select(func.count(Comment.id))
+        .where(Comment.topic_id == id)
+        .correlate_except(Comment)
+        .scalar_subquery()
+    )
 
     files = relationship('File', back_populates='topic')
     author = relationship('User', back_populates='topics')
@@ -89,14 +115,6 @@ class Topic(DbBaseModel):
     categories = relationship('Category', secondary=TOPIC_has_CATEGORY, back_populates='topics')
     saved_by = relationship('User', secondary=USER_saves_TOPIC, back_populates='saved_topics')
     rated_by = relationship('UserRatesTopic', back_populates='topic')
-
-    @property
-    def rating(self) -> int:
-        return sum([user_rating.rating for user_rating in self.rated_by])
-
-    @property
-    def comments_count(self) -> int:
-        return len(self.comments)
 
     def user_has_liked_topic(self, db_session: Session, user_id: int) -> bool:
         return bool(db_session.query(UserRatesTopic).filter_by(
@@ -115,20 +133,6 @@ class Category(DbBaseModel):
     color = Column(String, nullable=True)
 
     topics = relationship('Topic', secondary=TOPIC_has_CATEGORY, back_populates='categories')
-
-
-class Comment(DbBaseModel):
-    __tablename__ = 'comments'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    content = Column(String, nullable=False)
-    is_fixed = Column(Boolean, default=False, nullable=False)
-    topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
-
-    user = relationship('User', back_populates='comments')
-    files = relationship('File', back_populates='comment')
-    topic = relationship('Topic', back_populates='comments')
 
 
 class File(DbBaseModel):
