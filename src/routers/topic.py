@@ -48,7 +48,7 @@ def get_all_topics(
         topic_filter: TopicFilterSchema = FilterDepends(TopicFilterSchema),
         db_session: Session = Depends(get_db_session)
 ):
-    query = db_session.query(Topic).join(TOPIC_has_CATEGORY).join(Category)
+    query = db_session.query(Topic).outerjoin(TOPIC_has_CATEGORY).outerjoin(Category)
     query = topic_filter.filter(query)
     query = topic_filter.sort(query)
     topics = query.all()
