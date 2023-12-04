@@ -62,7 +62,7 @@ class User(DbBaseModel):
     topics = relationship('Topic', back_populates='author')
     rated_topics = relationship('UserRatesTopic', back_populates='user')
     saved_topics = relationship('Topic', secondary=USER_saves_TOPIC, back_populates='saved_by')
-    comments = relationship('Comment', back_populates='user')
+    comments = relationship('Comment', back_populates='author')
 
 
 class Tag(DbBaseModel):
@@ -83,7 +83,7 @@ class Comment(DbBaseModel):
     topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
 
-    user = relationship('User', back_populates='comments')
+    author = relationship('User', back_populates='comments')
     files = relationship('File', back_populates='comment')
     topic = relationship('Topic', back_populates='comments')
 
