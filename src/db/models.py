@@ -141,7 +141,11 @@ class Topic(DbBaseModel):
 
     files = relationship('File', back_populates='topic')
     author = relationship('User', back_populates='topics')
-    comments = relationship('Comment', back_populates='topic')
+    comments = relationship(
+        'Comment',
+        back_populates='topic',
+        order_by='desc(Comment.is_fixed), desc(Comment.rating), desc(Comment.created_at)'
+    )
     categories = relationship('Category', secondary=TOPIC_has_CATEGORY, back_populates='topics')
     saved_by = relationship('User', secondary=USER_saves_TOPIC, back_populates='saved_topics')
     rated_by = relationship('UserRatesTopic', back_populates='topic')
