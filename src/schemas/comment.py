@@ -18,3 +18,7 @@ class CommentRetrieveSchema(BaseModel):
     author: UserRetrieveSchema
     created_at: datetime
     updated_at: datetime
+
+
+class CommentRatingSchema(BaseModel):
+    rating: int

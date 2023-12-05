@@ -5,9 +5,9 @@ from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.db.models import Comment, User
+from src.db.models import Comment, User, UserRatesComment
 from src.routers.deps import get_db_session, get_authenticated_user, check_permission
-from src.schemas.comment import CommentCreateSchema, CommentRetrieveSchema
+from src.schemas.comment import CommentCreateSchema, CommentRetrieveSchema, CommentRatingSchema
 from src.utils.enumerations import Role
 
 
@@ -43,9 +43,9 @@ def get_comment(topic_id: int, comment_id: int, db_session: Session = Depends(ge
     comment = get_comment_or_raise_exception(comment_id, topic_id, db_session)
     return comment
 
-@comment_router.patch('/{comment_id:int}')
-def update_post(db_session: Session = Depends(get_db_session), current_user: User = Depends(get_authenticated_user)):
-    ...
+# @comment_router.patch('/{comment_id:int}')
+# def update_post(db_session: Session = Depends(get_db_session), current_user: User = Depends(get_authenticated_user)):
+#     ...
 
 
 @comment_router.delete('/{comment_id:int}')
@@ -77,6 +77,61 @@ def fix_comment(
 ):
     comment = get_comment_or_raise_exception(comment_id, topic_id, db_session)
     comment.update(db_session, is_fixed=True)
+    return comment
+
+
+@comment_router.post('/{comment_id:int}/upvote', response_model=CommentRatingSchema)
+def upvote_comment(
+        topic_id: int,
+        comment_id: int,
+        db_session: Session = Depends(get_db_session),
+        current_user: User = Depends(get_authenticated_user)
+):
+    comment = get_comment_or_raise_exception(comment_id, topic_id, db_session)
+
+    if comment.user_has_liked_comment(db_session, current_user.id):
+        # Se o usuário já havia avaliado o comentário positivamente, remove a avaliação
+        user_rating = UserRatesComment.get_one(db_session, user_id=current_user.id, comment_id=comment_id)
+        user_rating.delete(db_session)
+    else:
+        # Se o usuário não havia avaliado o comentário positivamente, adiciona a avaliação
+        user_rating = UserRatesComment(user_id=current_user.id, comment_id=comment_id, rating=1)
+        try:
+            user_rating.create_or_update(db_session)
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Erro ao avaliar comentário',
+            )
+
+    return comment
+
+
+@comment_router.post('/{comment_id:int}/downvote', response_model=CommentRatingSchema)
+def downvote_comment(
+        topic_id: int,
+        comment_id: int,
+        db_session: Session = Depends(get_db_session),
+        current_user: User = Depends(get_authenticated_user)
+):
+    comment = get_comment_or_raise_exception(comment_id, topic_id, db_session)
+
+    if comment.user_has_disliked_comment(db_session, current_user.id):
+        # Se o usuário já havia avaliado o comentário negativamente, remove a avaliação
+        user_rating = UserRatesComment.get_one(db_session, user_id=current_user.id, comment_id=comment_id)
+        user_rating.delete(db_session)
+    else:
+        # Se o usuário não havia avaliado o comentário negativamente, adiciona a avaliação
+        user_rating = UserRatesComment(user_id=current_user.id, comment_id=comment_id, rating=-1)
+        try:
+            user_rating.create_or_update(db_session)
+
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Erro ao avaliar comentário',
+            )
+
     return comment
 
 
