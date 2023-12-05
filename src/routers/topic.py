@@ -146,9 +146,9 @@ def upvote_topic(
     else:
         # Se o usuário não havia avaliado o tópico positivamente, adiciona a avaliação
         user_rating = UserRatesTopic(user_id=current_user.id, topic_id=topic_id, rating=1)
-        topic.current_user_rating = 1
         try:
             user_rating.create_or_update(db_session)
+            topic.current_user_rating = 1
         except SQLAlchemyError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -174,10 +174,9 @@ def downvote_topic(
     else:
         # Se o usuário não havia avaliado o tópico negativamente, adiciona a avaliação
         user_rating = UserRatesTopic(user_id=current_user.id, topic_id=topic_id, rating=-1)
-        topic.current_user_rating = -1
         try:
             user_rating.create_or_update(db_session)
-
+            topic.current_user_rating = -1
         except SQLAlchemyError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

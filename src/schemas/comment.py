@@ -24,3 +24,4 @@ class CommentRetrieveSchema(BaseModel):
 
 class CommentRatingSchema(BaseModel):
     rating: int
+    current_user_rating: int

@@ -93,11 +93,13 @@ def upvote_comment(
         # Se o usuário já havia avaliado o comentário positivamente, remove a avaliação
         user_rating = UserRatesComment.get_one(db_session, user_id=current_user.id, comment_id=comment_id)
         user_rating.delete(db_session)
+        comment.current_user_rating = 0
     else:
         # Se o usuário não havia avaliado o comentário positivamente, adiciona a avaliação
         user_rating = UserRatesComment(user_id=current_user.id, comment_id=comment_id, rating=1)
         try:
             user_rating.create_or_update(db_session)
+            comment.current_user_rating = 1
         except SQLAlchemyError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -120,12 +122,13 @@ def downvote_comment(
         # Se o usuário já havia avaliado o comentário negativamente, remove a avaliação
         user_rating = UserRatesComment.get_one(db_session, user_id=current_user.id, comment_id=comment_id)
         user_rating.delete(db_session)
+        comment.current_user_rating = 0
     else:
         # Se o usuário não havia avaliado o comentário negativamente, adiciona a avaliação
         user_rating = UserRatesComment(user_id=current_user.id, comment_id=comment_id, rating=-1)
         try:
             user_rating.create_or_update(db_session)
-
+            comment.current_user_rating = -1
         except SQLAlchemyError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
