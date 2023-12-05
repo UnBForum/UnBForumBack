@@ -106,6 +106,14 @@ class Comment(DbBaseModel):
     topic = relationship('Topic', back_populates='comments')
     rated_by = relationship('UserRatesComment', back_populates='comment')
 
+    def user_has_liked_comment(self, db_session: Session, user_id: int) -> bool:
+        return bool(db_session.query(UserRatesComment).filter_by(
+            user_id=user_id, comment_id=self.id, rating=1).one_or_none())
+
+    def user_has_disliked_comment(self, db_session: Session, user_id: int) -> bool:
+        return bool(db_session.query(UserRatesComment).filter_by(
+            user_id=user_id, comment_id=self.id, rating=-1).one_or_none())
+
 
 class Topic(DbBaseModel):
     __tablename__ = 'topics'
