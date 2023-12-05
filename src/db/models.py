@@ -38,6 +38,17 @@ TOPIC_has_CATEGORY = Table(
 )
 
 
+class UserRatesComment(DbBaseModel):
+    __tablename__ = 'user_rates_comment'
+
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+    comment_id = Column(Integer, ForeignKey('comments.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+    rating = Column(Integer, nullable=False)
+
+    user = relationship('User', back_populates='rated_comments')
+    comment = relationship('Comment', back_populates='rated_by')
+
+
 class UserRatesTopic(DbBaseModel):
     __tablename__ = 'user_rates_topic'
 
@@ -63,6 +74,7 @@ class User(DbBaseModel):
     rated_topics = relationship('UserRatesTopic', back_populates='user')
     saved_topics = relationship('Topic', secondary=USER_saves_TOPIC, back_populates='saved_by')
     comments = relationship('Comment', back_populates='author')
+    rated_comments = relationship('UserRatesComment', back_populates='user')
 
 
 class Tag(DbBaseModel):
@@ -82,10 +94,17 @@ class Comment(DbBaseModel):
     is_fixed = Column(Boolean, default=False, nullable=False)
     topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+    rating = column_property(
+        select(func.coalesce(func.sum(UserRatesComment.rating), 0))
+        .filter(UserRatesComment.comment_id == id)
+        .correlate_except(UserRatesComment)
+        .scalar_subquery()
+    )
 
     author = relationship('User', back_populates='comments')
     files = relationship('File', back_populates='comment')
     topic = relationship('Topic', back_populates='comments')
+    rated_by = relationship('UserRatesComment', back_populates='comment')
 
 
 class Topic(DbBaseModel):
