@@ -17,6 +17,8 @@ oauth_scheme = OAuth2PasswordBearer(
     }
 )
 
+oauth_scheme_without_exception = OAuth2PasswordBearer(tokenUrl='/users/login', auto_error=False)
+
 
 def get_db_session():
     session = LocalSession()
@@ -26,11 +28,16 @@ def get_db_session():
         session.close()
 
 
-def get_authenticated_user(
-    db_session: Session = Depends(get_db_session),
-    token: str = Depends(oauth_scheme)
-):
+def get_authenticated_user(db_session: Session = Depends(get_db_session),token: str = Depends(oauth_scheme)):
     return verify_token_n_get_user(token, db_session)
+
+
+def get_current_user(
+        db_session: Session = Depends(get_db_session),
+        token: str = Depends(oauth_scheme_without_exception)
+):
+    # Gets the current user or None if the user is not authenticated
+    return verify_token_n_get_user(token, db_session) if token else None
 
 
 def check_permission(security_scopes: SecurityScopes, current_user: User = Depends(get_authenticated_user)):

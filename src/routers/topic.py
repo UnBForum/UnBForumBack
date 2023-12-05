@@ -9,8 +9,9 @@ from fastapi_filter import FilterDepends
 from src.db.models import Topic, Category, User, File, TOPIC_has_CATEGORY, UserRatesTopic
 from src.schemas.topic import (TopicCreateSchema, TopicRetrieveSchema, TopicRetrieveExtendedSchema,
                                TopicUpdateSchema, TopicFilterSchema, TopicRatingSchema)
-from src.routers.deps import get_db_session, get_authenticated_user, check_permission
+from src.routers.deps import get_db_session, get_authenticated_user, check_permission, get_current_user
 from src.utils.enumerations import Role
+
 
 topic_router = APIRouter(prefix='/topics', tags=['Topic'])
 
@@ -51,19 +52,29 @@ def create_topic(
 @topic_router.get('/', response_model=List[TopicRetrieveSchema])
 def get_all_topics(
         topic_filter: TopicFilterSchema = FilterDepends(TopicFilterSchema),
-        db_session: Session = Depends(get_db_session)
+        db_session: Session = Depends(get_db_session),
+        current_user: User | None = Depends(get_current_user)
 ):
     query = db_session.query(Topic).outerjoin(TOPIC_has_CATEGORY).outerjoin(Category)
     query = topic_filter.filter(query)
     query = topic_filter.sort(query)
-    topics = query.all()
+
+    topics = []
+    for topic in query.all():
+        topic.current_user_rating = topic.get_current_user_rating(db_session, getattr(current_user, 'id', -1))
+        topics.append(TopicRetrieveSchema.model_validate(topic))
     return topics
 
 
 @topic_router.get('/{topic_id:int}', response_model=TopicRetrieveExtendedSchema)
-def get_one_topic(topic_id: int, db_session: Session = Depends(get_db_session)):
+def get_one_topic(
+        topic_id: int,
+        db_session: Session = Depends(get_db_session),
+        current_user: User | None = Depends(get_current_user)
+):
     topic = get_topic_or_raise_exception(topic_id, db_session)
-    return topic
+    topic.current_user_rating = topic.get_current_user_rating(db_session, getattr(current_user, 'id', -1))
+    return TopicRetrieveExtendedSchema.model_validate(topic)
 
 
 @topic_router.patch('/{topic_id:int}', response_model=TopicRetrieveSchema)
@@ -130,9 +141,11 @@ def upvote_topic(
         # Se o usuário já havia avaliado o tópico positivamente, remove a avaliação
         user_rating = UserRatesTopic.get_one(db_session, user_id=current_user.id, topic_id=topic_id)
         user_rating.delete(db_session)
+        topic.current_user_rating = 0
     else:
         # Se o usuário não havia avaliado o tópico positivamente, adiciona a avaliação
         user_rating = UserRatesTopic(user_id=current_user.id, topic_id=topic_id, rating=1)
+        topic.current_user_rating = 1
         try:
             user_rating.create_or_update(db_session)
         except SQLAlchemyError:
@@ -156,9 +169,11 @@ def downvote_topic(
         # Se o usuário já havia avaliado o tópico negativamente, remove a avaliação
         user_rating = UserRatesTopic.get_one(db_session, user_id=current_user.id, topic_id=topic_id)
         user_rating.delete(db_session)
+        topic.current_user_rating = 0
     else:
         # Se o usuário não havia avaliado o tópico negativamente, adiciona a avaliação
         user_rating = UserRatesTopic(user_id=current_user.id, topic_id=topic_id, rating=-1)
+        topic.current_user_rating = -1
         try:
             user_rating.create_or_update(db_session)
 
@@ -193,4 +208,3 @@ def get_topic_or_raise_exception(topic_id: int, db_session: Session) -> Topic:
             detail='Tópico não encontrado',
         )
     return topic
-

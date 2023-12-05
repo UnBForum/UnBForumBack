@@ -1,7 +1,7 @@
 from typing import List
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.schemas.user import UserRetrieveSchema
 
@@ -18,6 +18,8 @@ class CommentRetrieveSchema(BaseModel):
     author: UserRetrieveSchema
     created_at: datetime
     updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CommentRatingSchema(BaseModel):

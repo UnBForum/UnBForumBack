@@ -2,7 +2,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from fastapi import Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from fastapi_filter import FilterDepends, with_prefix
 from fastapi_filter.contrib.sqlalchemy import Filter
 
@@ -28,11 +28,14 @@ class TopicRetrieveSchema(BaseModel):
     is_fixed: bool
     author: UserRetrieveSchema
     rating: int
+    current_user_rating: Optional[int] = None
     comments_count: int
     files: List[FileRetrieveSchema]
     categories: List[CategoryRetrieveSchema]
     created_at: datetime
     updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True, extra='allow')
 
 
 class TopicRetrieveExtendedSchema(TopicRetrieveSchema):
@@ -41,6 +44,7 @@ class TopicRetrieveExtendedSchema(TopicRetrieveSchema):
 
 class TopicRatingSchema(BaseModel):
     rating: int
+    current_user_rating: int
 
 
 class TopicUpdateSchema(BaseModel):

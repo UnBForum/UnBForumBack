@@ -1,7 +1,7 @@
 from typing import Optional, List
 from datetime import datetime
 
-from pydantic import BaseModel, Field, EmailStr, field_validator
+from pydantic import BaseModel, Field, EmailStr, field_validator, ConfigDict
 
 from src.utils.enumerations import Role
 from src.schemas.tag import TagRetrieveSchema
@@ -35,6 +35,8 @@ class UserRetrieveSchema(BaseModel):
     tags: List[TagRetrieveSchema]
     created_at: datetime
     updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserUpdateSchema(BaseModel):

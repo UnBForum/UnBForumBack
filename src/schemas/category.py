@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 from typing import Optional, List
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, ConfigDict
 from fastapi_filter.contrib.sqlalchemy import Filter
 
 from src.db.models import Category
@@ -26,6 +26,8 @@ class CategoryRetrieveSchema(BaseModel):
     color: str
     created_at: datetime
     updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CategoryFilterSchema(Filter):
