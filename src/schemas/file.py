@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class FileRetrieveSchema(BaseModel):
@@ -10,5 +10,3 @@ class FileRetrieveSchema(BaseModel):
     upload_path: str
     created_at: datetime
     updated_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)

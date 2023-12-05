@@ -7,7 +7,7 @@ from fastapi.exceptions import HTTPException
 from fastapi_filter import FilterDepends
 
 from src.db.models import Topic, Category, User, File, TOPIC_has_CATEGORY, UserRatesTopic
-from src.schemas.topic import (TopicCreateSchema, TopicRetrieveSchema, TopicRetrieveExtendedSchema,
+from src.schemas.topic import (TopicCreateSchema, TopicRetrieveSchema, TopicWithCommentsSchema,
                                TopicUpdateSchema, TopicFilterSchema, TopicRatingSchema)
 from src.routers.deps import get_db_session, get_authenticated_user, check_permission, get_current_user
 from src.utils.enumerations import Role
@@ -62,11 +62,11 @@ def get_all_topics(
     topics = []
     for topic in query.all():
         topic.current_user_rating = topic.get_current_user_rating(db_session, getattr(current_user, 'id', -1))
-        topics.append(TopicRetrieveSchema.model_validate(topic))
+        topics.append(topic)
     return topics
 
 
-@topic_router.get('/{topic_id:int}', response_model=TopicRetrieveExtendedSchema)
+@topic_router.get('/{topic_id:int}', response_model=TopicWithCommentsSchema)
 def get_one_topic(
         topic_id: int,
         db_session: Session = Depends(get_db_session),
@@ -74,7 +74,8 @@ def get_one_topic(
 ):
     topic = get_topic_or_raise_exception(topic_id, db_session)
     topic.current_user_rating = topic.get_current_user_rating(db_session, getattr(current_user, 'id', -1))
-    return TopicRetrieveExtendedSchema.model_validate(topic)
+    topic.comments = topic.comments_with_current_user_rating(db_session, getattr(current_user, 'id', -1))
+    return topic
 
 
 @topic_router.patch('/{topic_id:int}', response_model=TopicRetrieveSchema)

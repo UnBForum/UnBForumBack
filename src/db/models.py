@@ -155,6 +155,13 @@ class Topic(DbBaseModel):
             user_id=user_id, topic_id=self.id).one_or_none()
         return user_rating.rating if user_rating else 0
 
+    def comments_with_current_user_rating(self, db_session: Session, user_id: int) -> list[Comment]:
+        comments = []
+        for comment in self.comments:
+            comment.current_user_rating = comment.get_current_user_rating(db_session, user_id)
+            comments.append(comment)
+        return comments
+
     def user_has_liked_topic(self, db_session: Session, user_id: int) -> bool:
         return self.get_current_user_rating(db_session, user_id) == 1
 
