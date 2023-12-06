@@ -47,7 +47,7 @@ async def upload_files(
             with upload_path.open('wb') as buffer:
                 shutil.copyfileobj(file.file, buffer)
             file_on_db = File(
-                name=str(upload_path),
+                name=filename,
                 content_type=file.content_type,
                 upload_path=str(upload_path),
             )
