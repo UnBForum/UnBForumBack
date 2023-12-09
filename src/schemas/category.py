@@ -15,7 +15,7 @@ class CategoryCreateSchema(BaseModel):
     @field_validator('color')
     @classmethod
     def validate_color(cls, color: str):
-        if not re.match(r'#?(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})|([0-9a-f])([0-9a-f])([0-9a-f]))', color):
+        if not re.match(r'^#(?:[0-9a-fA-F]{3}){1,2}$', color):
             raise ValueError('Cor inválida')
         return color
 
