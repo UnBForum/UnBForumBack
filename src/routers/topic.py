@@ -121,13 +121,30 @@ def save_topic(
     current_user.saved_topics.append(topic)
     try:
         current_user.save(db_session)
-        # return current_user
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Tópico já salvo',
         )
-    return Response(status_code=status.HTTP_200_OK)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@topic_router.post('/{topic_id:int}/unsave')
+def unsave_topic(
+        topic_id: int,
+        db_session: Session = Depends(get_db_session),
+        current_user: User = Depends(get_authenticated_user)
+):
+    topic = get_topic_or_raise_exception(topic_id, db_session)
+    try:
+        current_user.saved_topics.remove(topic)
+        current_user.save(db_session)
+    except ValueError or SQLAlchemyError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Erro ao deixar de salvar tópico',
+        )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @topic_router.post('/{topic_id:int}/upvote', response_model=TopicRatingSchema)
