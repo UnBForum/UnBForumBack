@@ -162,6 +162,9 @@ class Topic(DbBaseModel):
             comments.append(comment)
         return comments
 
+    def is_saved_by_current_user(self, db_session: Session, user_id: int) -> bool:
+        return bool(db_session.query(USER_saves_TOPIC).filter_by(user_id=user_id, topic_id=self.id).one_or_none())
+
     def user_has_liked_topic(self, db_session: Session, user_id: int) -> bool:
         return self.get_current_user_rating(db_session, user_id) == 1
 

@@ -28,6 +28,7 @@ class TopicRetrieveSchema(BaseModel):
     is_fixed: bool
     rating: int
     current_user_rating: Optional[int] = None
+    current_user_has_saved: Optional[bool] = None
     comments_count: int
     author: UserRetrieveSchema
     files: List[FileRetrieveSchema]
