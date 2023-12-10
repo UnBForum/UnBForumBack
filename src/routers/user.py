@@ -105,6 +105,11 @@ def delete_current_user(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@user_router.get('/me/topics', response_model=List[TopicRetrieveSchema])
-def get_current_user_topics(current_user: User = Depends(get_authenticated_user)):
+@user_router.get('/me/topics/', tags=['Topic'], response_model=List[TopicRetrieveSchema])
+def get_current_user_created_topics(current_user: User = Depends(get_authenticated_user)):
     return current_user.topics
+
+
+@user_router.get('/me/saved_topics/', tags=['Topic'], response_model=List[TopicRetrieveSchema])
+def get_current_user_saved_topics(current_user: User = Depends(get_authenticated_user)):
+    return current_user.saved_topics
