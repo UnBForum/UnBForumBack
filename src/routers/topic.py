@@ -241,7 +241,7 @@ def fix_topic(
         db_session: Session = Depends(get_db_session)
 ):
     topic = get_topic_or_raise_exception(topic_id, db_session)
-    topic.update(db_session, is_fixed=True)
+    topic.update(db_session, is_fixed=not topic.is_fixed)
     return topic
 
 
