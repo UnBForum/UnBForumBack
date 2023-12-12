@@ -80,7 +80,7 @@ def get_one_topic(
     return topic
 
 
-@topic_router.patch('/{topic_id:int}', response_model=TopicRetrieveSchema)
+@topic_router.put('/{topic_id:int}', response_model=TopicRetrieveSchema)
 def update_topic(
         topic_id: int,
         topic: TopicUpdateSchema,
@@ -93,8 +93,34 @@ def update_topic(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='Você não tem permissão para realizar esta ação',
         )
-    topic_on_db.update(db_session, **topic.model_dump(exclude_none=True))
-    return topic_on_db
+
+    categories = []
+    for category_id in topic.categories:
+        category_on_db = Category.get_one(db_session, id=category_id)
+        if not category_on_db:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'Erro ao atualizar o tópico. Categoria não existe',
+            )
+        categories.append(category_on_db)
+
+    files = []
+    for file_id in topic.files:
+        file_on_db = File.get_one(db_session, id=file_id)
+        if not file_on_db:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'Erro ao atualizar o tópico. Arquivo não existe',
+            )
+        files.append(file_on_db)
+
+    try:
+        topic_on_db.categories = categories
+        topic_on_db.files = files
+        topic_on_db.update(db_session, **topic.model_dump(exclude={'categories', 'files'}))
+        return topic_on_db
+    except SQLAlchemyError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Erro ao atualizar o tópico')
 
 
 @topic_router.delete('/{topic_id:int}')

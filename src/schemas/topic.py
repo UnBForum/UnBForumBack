@@ -47,8 +47,10 @@ class TopicRatingSchema(BaseModel):
 
 
 class TopicUpdateSchema(BaseModel):
-    title: Optional[str] = None
-    content: Optional[str] = None
+    title: str
+    content: str
+    categories: List[int] = []
+    files: List[int] = []
 
 
 class TopicFilterSchema(Filter):
