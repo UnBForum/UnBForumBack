@@ -5,10 +5,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from fastapi import APIRouter, Depends, status, Response, Security
 from fastapi.exceptions import HTTPException
 
-from src.db.models import Category
+from src.db.models import Topic, Category, TOPIC_has_CATEGORY
 from src.schemas.category import CategoryCreateSchema, CategoryRetrieveSchema
 from src.routers.deps import get_db_session, check_permission
 from src.utils.enumerations import Role
+from src.utils.graph import calculate_degree_centrality
 
 category_router = APIRouter(prefix='/categories', tags=['Category'])
 
@@ -33,8 +34,13 @@ def create_category(category: CategoryCreateSchema, db_session: Session = Depend
 
 @category_router.get('/', response_model=List[CategoryRetrieveSchema])
 def get_all_categories(db_session: Session = Depends(get_db_session)):
+    topics = Topic.get_all(db_session)
     categories = Category.get_all(db_session)
-    return categories
+    topic_has_category = db_session.query(TOPIC_has_CATEGORY)
+
+    bipartite_degree_centrality = calculate_degree_centrality(topics, categories, topic_has_category)
+
+    return sorted(categories, key=lambda category: bipartite_degree_centrality.get(category.id, 0),reverse=True)
 
 
 @category_router.get('/{category_id}', response_model=CategoryRetrieveSchema)
