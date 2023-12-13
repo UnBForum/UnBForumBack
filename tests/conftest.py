@@ -3,7 +3,7 @@ from pytest_bdd import given, then, parsers
 from passlib.context import CryptContext
 
 from src.db.connection import LocalSession
-from src.db.models import User, Tag, Category
+from src.db.models import User, Tag, Category, File, Topic
 from src.utils.jwt import create_access_token
 
 crypt_context = CryptContext(schemes=['sha256_crypt'])
@@ -24,6 +24,7 @@ def _clean_database(db_session):
     Tag.delete_all(db_session)
     User.delete_all(db_session)
     Category.delete_all(db_session)
+    Topic.delete_all(db_session)
 
 # Hooks
 
@@ -70,8 +71,8 @@ def create_user(db_session, request):
 
 @pytest.fixture()
 def create_category(db_session, request):
-    def _create_category(name='TCC', color='#10B981'):
-        category = Category(name=name, color=color)
+    def _create_category(id_=1, name='TCC', color='#10B981'):
+        category = Category(id=id_, name=name, color=color)
         category.save(db_session)
 
         return category
@@ -79,6 +80,19 @@ def create_category(db_session, request):
     yield _create_category
 
     request.addfinalizer(lambda: Category.delete_all(db_session))
+
+
+@pytest.fixture()
+def create_file(db_session, request):
+    def _create_file(id_=1, name='Arquivo', content_type='image/jpg', upload_path='/path/file.jpg'):
+        file = File(id=id_, name=name, content_type=content_type, upload_path=upload_path)
+        file.save(db_session)
+
+        return file
+
+    yield _create_file
+
+    request.addfinalizer(lambda: File.delete_all(db_session))
 
 # Common Steps
 
@@ -91,7 +105,7 @@ def given_a_authenticated_user(create_user):
     return create_user(role='member')
 
 @given('Um usuário autenticado (moderador)', target_fixture='user')
-def given_a_authenticated_admin(create_user):
+def given_a_authenticated_moderator(create_user):
     return create_user(role='moderator')
 
 @given('Um usuário autenticado (administrador)', target_fixture='user')
