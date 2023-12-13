@@ -10,7 +10,7 @@ scenarios('../../features/category/test_create_category.feature')
 
 @given(parsers.parse('Uma categoria com o nome {name} já existe'))
 def given_a_category_already_exists(create_category, name):
-    create_category(name)
+    create_category(name=name)
 
 @when(
     parsers.parse('O endpoint "POST /categories" é chamado com o nome {name} e cor {color}'),
