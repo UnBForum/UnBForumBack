@@ -5,7 +5,7 @@ from src.main import app
 from src.schemas.user import UserRetrieveSchema
 
 client = TestClient(app)
-scenarios('../../features/user/test_create_user.feature')
+scenarios('../../features/user/create_user.feature')
 
 
 @given(parsers.parse('Já existe um usuário cadastrado com o email {email}'))

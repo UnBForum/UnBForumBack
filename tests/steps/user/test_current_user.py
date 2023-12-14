@@ -5,7 +5,7 @@ from src.main import app
 from src.schemas.user import UserRetrieveSchema
 
 client = TestClient(app)
-scenarios('../../features/user/test_current_user.feature')
+scenarios('../../features/user/current_user.feature')
 
 
 @when(

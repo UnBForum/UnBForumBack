@@ -6,7 +6,7 @@ from src.schemas.topic import TopicRetrieveSchema
 
 
 client = TestClient(app)
-scenarios('../../features/topic/test_create_topic.feature')
+scenarios('../../features/topic/create_topic.feature')
 EXTRA_TYPES = {'Integer': int}
 
 

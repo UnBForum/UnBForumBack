@@ -6,7 +6,7 @@ from src.schemas.auth import TokenData
 
 
 client = TestClient(app)
-scenarios('../../features/auth/test_login.feature')
+scenarios('../../features/auth/login.feature')
 
 
 @given(parsers.parse('O usuário possui uma conta cadastrada com o email "{email}" e senha "{password}"'))

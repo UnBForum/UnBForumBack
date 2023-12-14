@@ -5,7 +5,7 @@ from src.main import app
 from src.schemas.category import CategoryRetrieveSchema
 
 client = TestClient(app)
-scenarios('../../features/category/test_create_category.feature')
+scenarios('../../features/category/create_category.feature')
 
 
 @given(parsers.parse('Uma categoria com o nome {name} já existe'))
