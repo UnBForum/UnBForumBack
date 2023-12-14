@@ -8,7 +8,6 @@ from src.schemas.user import UserRetrieveSchema
 
 class CommentCreateSchema(BaseModel):
     content: str
-    files: List[str] = []
 
 
 class CommentRetrieveSchema(BaseModel):

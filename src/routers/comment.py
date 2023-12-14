@@ -43,9 +43,29 @@ def get_comment(topic_id: int, comment_id: int, db_session: Session = Depends(ge
     comment = get_comment_or_raise_exception(comment_id, topic_id, db_session)
     return comment
 
-# @comment_router.patch('/{comment_id:int}')
-# def update_post(db_session: Session = Depends(get_db_session), current_user: User = Depends(get_authenticated_user)):
-#     ...
+@comment_router.put('/{comment_id:int}')
+def update_comment(
+        topic_id: int,
+        comment_id: int,
+        comment: CommentCreateSchema,
+        db_session: Session = Depends(get_db_session), current_user: User = Depends(get_authenticated_user)
+):
+    comment_on_db = get_comment_or_raise_exception(comment_id, topic_id, db_session)
+    if comment_on_db.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Você não tem permissão para realizar esta ação',
+        )
+
+    try:
+        comment_on_db.update(db_session, **comment.model_dump())
+        return comment_on_db
+    except SQLAlchemyError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Erro ao atualizar o comentário',
+        )
+
 
 
 @comment_router.delete('/{comment_id:int}')
