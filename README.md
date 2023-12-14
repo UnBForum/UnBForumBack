@@ -40,3 +40,10 @@ docker-compose -f docker-compose.yml up --build -d
 
 4. Acesse o endereço http://localhost:8000/docs ou http://localhost:8000/redoc para visualizar a documentação da API
 
+
+## Autores
+
+| ![Herick Portugues](https://github.com/herickport.png?size=96) | ![Lucas Boaventura](https://github.com/lboaventura25.png?size=96) |
+|----------------------------------------------------------------|-------------------------------------------------------------------|
+| Hérick Portugues                                               | Lucas Boaventura                                                  |
+
