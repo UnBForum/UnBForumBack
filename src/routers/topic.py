@@ -233,7 +233,6 @@ def downvote_topic(
 
 @topic_router.post(
     '/{topic_id:int}/fix',
-    response_model=TopicRetrieveSchema,
     dependencies=[Security(check_permission, scopes=[Role.moderator, Role.administrator])]
 )
 def fix_topic(
@@ -242,7 +241,7 @@ def fix_topic(
 ):
     topic = get_topic_or_raise_exception(topic_id, db_session)
     topic.update(db_session, is_fixed=not topic.is_fixed)
-    return topic
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 def get_topic_or_raise_exception(topic_id: int, db_session: Session) -> Topic:
