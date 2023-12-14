@@ -6,16 +6,23 @@ from src.schemas.user import UserRetrieveSchema
 
 client = TestClient(app)
 scenarios('../../features/user/create_user.feature')
+EXTRA_TYPES = {'String': str}
 
 
 @given(parsers.parse('Já existe um usuário cadastrado com o email {email}'))
 def given_a_user_already_exists(create_user, email):
     create_user(email)
 
+
+@given(parsers.cfparse('As tags {tags:String*} já existem', extra_types=EXTRA_TYPES))
+def given_the_tags_already_exists(tags, create_tag):
+    for tag_name in tags:
+        create_tag(name=tag_name)
+
 @when(
     parsers.cfparse(
-        'O endpoint "POST /users" é chamado com os dados {email:String}, {password:String}, {tags:String*}',
-        extra_types={'String': str}),
+        'O endpoint "POST /users" é chamado com os dados {email:String}, {password:String}, {tags:String*}.',
+        extra_types=EXTRA_TYPES),
     target_fixture='response'
 )
 def create_user_request(email, password, tags):

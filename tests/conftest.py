@@ -8,18 +8,6 @@ from src.utils.jwt import create_access_token
 
 crypt_context = CryptContext(schemes=['sha256_crypt'])
 
-def _create_default_tags(db_session):
-    Tag(name='Engenharias').save(db_session)
-    Tag(name='Engenharia Aeroespacial').save(db_session)
-    Tag(name='Engenharia Automotiva').save(db_session)
-    Tag(name='Engenharia de Energia').save(db_session)
-    Tag(name='Engenharia de Software').save(db_session)
-    Tag(name='Engenharia Eletrônica').save(db_session)
-
-    Tag(name='Estudante').save(db_session)
-    Tag(name='Professor').save(db_session)
-    Tag(name='Técnico').save(db_session)
-
 def _clean_database(db_session):
     Tag.delete_all(db_session)
     User.delete_all(db_session)
@@ -30,7 +18,6 @@ def _clean_database(db_session):
 
 def pytest_bdd_before_scenario(request, feature, scenario):
     _clean_database(request.getfixturevalue('db_session'))
-    _create_default_tags(request.getfixturevalue('db_session'))
 
 def pytest_bdd_after_scenario(request, feature, scenario):
     _clean_database(request.getfixturevalue('db_session'))
@@ -54,12 +41,7 @@ def get_token(request):
 @pytest.fixture()
 def create_user(db_session, request):
     def _create_user(email='johndoe@unb.br', password='teste_senha', role='member'):
-        user = User(
-            name='Usuário de Testes',
-            email=email,
-            role=role,
-            password=crypt_context.hash(password)
-        )
+        user = User(name='Usuário de Testes', email=email, role=role, password=crypt_context.hash(password))
         user.save(db_session)
 
         return user
@@ -67,6 +49,19 @@ def create_user(db_session, request):
     yield _create_user
 
     request.addfinalizer(lambda: User.delete_all(db_session))
+
+
+@pytest.fixture()
+def create_tag(db_session, request):
+    def _create_tag(name='Tag'):
+        tag = Tag(name=name)
+        tag.save(db_session)
+
+        return tag
+
+    yield _create_tag
+
+    request.addfinalizer(lambda: Tag.delete_all(db_session))
 
 
 @pytest.fixture()
@@ -93,6 +88,19 @@ def create_file(db_session, request):
     yield _create_file
 
     request.addfinalizer(lambda: File.delete_all(db_session))
+
+
+@pytest.fixture()
+def create_topic(db_session, request):
+    def _create_topic(id_=1, title='Título', content='Descrição', user_id=1, is_fixed=False):
+        topic = Topic(id=id_, title=title, content=content, user_id=user_id, is_fixed=is_fixed)
+        topic.save(db_session)
+
+        return topic
+
+    yield _create_topic
+
+    request.addfinalizer(lambda: Topic.delete_all(db_session))
 
 # Common Steps
 
