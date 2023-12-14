@@ -61,8 +61,7 @@ def get_all_topics(
 
     topics = []
     for topic in query.all():
-        topic.current_user_rating = topic.get_current_user_rating(db_session, getattr(current_user, 'id', -1))
-        topic.current_user_has_saved = topic.is_saved_by_current_user(db_session, getattr(current_user, 'id', -1))
+        topic.fill_current_user_information(db_session, getattr(current_user, 'id', -1))
         topics.append(topic)
     return topics
 
@@ -74,8 +73,7 @@ def get_one_topic(
         current_user: User | None = Depends(get_current_user)
 ):
     topic = get_topic_or_raise_exception(topic_id, db_session)
-    topic.current_user_rating = topic.get_current_user_rating(db_session, getattr(current_user, 'id', -1))
-    topic.current_user_has_saved = topic.is_saved_by_current_user(db_session, getattr(current_user, 'id', -1))
+    topic.fill_current_user_information(db_session, getattr(current_user, 'id', -1))
     topic.comments = topic.comments_with_current_user_rating(db_session, getattr(current_user, 'id', -1))
     return topic
 

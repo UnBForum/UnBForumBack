@@ -106,10 +106,24 @@ def delete_current_user(
 
 
 @user_router.get('/me/topics/', tags=['Topic'], response_model=List[TopicRetrieveSchema])
-def get_current_user_created_topics(current_user: User = Depends(get_authenticated_user)):
-    return current_user.topics
+def get_current_user_created_topics(
+        db_session: Session = Depends(get_db_session),
+        current_user: User = Depends(get_authenticated_user)
+):
+    topics = []
+    for topic in current_user.topics:
+        topic.fill_current_user_information(db_session, getattr(current_user, 'id', -1))
+        topics.append(topic)
+    return topics
 
 
 @user_router.get('/me/saved_topics/', tags=['Topic'], response_model=List[TopicRetrieveSchema])
-def get_current_user_saved_topics(current_user: User = Depends(get_authenticated_user)):
-    return current_user.saved_topics
+def get_current_user_saved_topics(
+        db_session: Session = Depends(get_db_session),
+        current_user: User = Depends(get_authenticated_user)
+):
+    topics = []
+    for topic in current_user.saved_topics:
+        topic.fill_current_user_information(db_session, getattr(current_user, 'id', -1))
+        topics.append(topic)
+    return topics

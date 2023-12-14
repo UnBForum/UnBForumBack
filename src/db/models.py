@@ -171,6 +171,10 @@ class Topic(DbBaseModel):
     def user_has_disliked_topic(self, db_session: Session, user_id: int) -> bool:
         return self.get_current_user_rating(db_session, user_id) == -1
 
+    def fill_current_user_information(self, db_session: Session, user_id: int):
+        self.current_user_rating = self.get_current_user_rating(db_session, user_id)
+        self.current_user_has_saved = self.is_saved_by_current_user(db_session, user_id)
+
 
 class Category(DbBaseModel):
     __tablename__ = 'categories'
