@@ -3,7 +3,7 @@ from pytest_bdd import given, then, parsers
 from passlib.context import CryptContext
 
 from src.db.connection import LocalSession
-from src.db.models import User, Tag, Category, File, Topic
+from src.db.models import User, Tag, Category, File, Topic, Comment
 from src.utils.jwt import create_access_token
 
 crypt_context = CryptContext(schemes=['sha256_crypt'])
@@ -13,6 +13,7 @@ def _clean_database(db_session):
     User.delete_all(db_session)
     Category.delete_all(db_session)
     Topic.delete_all(db_session)
+    Comment.delete_all(db_session)
 
 # Hooks
 
@@ -101,6 +102,19 @@ def create_topic(db_session, request):
     yield _create_topic
 
     request.addfinalizer(lambda: Topic.delete_all(db_session))
+
+
+@pytest.fixture()
+def create_comment(db_session, request):
+    def _create_comment(id_=1, content='Descrição', user_id=1, topic_id=1, is_fixed=False):
+        comment = Comment(id=id_, content=content, user_id=user_id, topic_id=topic_id, is_fixed=is_fixed)
+        comment.save(db_session)
+
+        return comment
+
+    yield _create_comment
+
+    request.addfinalizer(lambda: Comment.delete_all(db_session))
 
 # Common Steps
 
