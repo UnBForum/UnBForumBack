@@ -120,6 +120,10 @@ def given_a_authenticated_moderator(create_user):
 def given_a_authenticated_admin(create_user):
     return create_user(role='administrator')
 
+@given(parsers.parse('Um tópico com id {topic_id:d}'))
+def given_a_topic_already_exist(topic_id: int, user: User, create_topic):
+    create_topic(id_=topic_id, user_id=user.id)
+
 @then(parsers.parse('O status da resposta é "{code:d}"'))
 def check_status_code(response, code):
     assert response.status_code == code

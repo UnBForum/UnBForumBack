@@ -10,11 +10,6 @@ client = TestClient(app)
 scenarios('../../features/topic/save_topic.feature')
 
 
-@given(parsers.parse('Um tópico com id {topic_id:d}'))
-def given_a_topic_already_exist(topic_id: int, user: User, create_topic):
-    create_topic(id_=topic_id, user_id=user.id)
-
-
 @given(parsers.parse('O tópico com id {topic_id:d} está salvo pelo usuário'))
 @when(parsers.parse('O endpoint "POST /topics/{topic_id:d}/save/" é chamado'), target_fixture='response')
 def save_topic_request(topic_id: int, user: User, get_token):
