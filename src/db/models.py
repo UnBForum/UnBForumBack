@@ -93,7 +93,7 @@ class Comment(DbBaseModel):
     content = Column(String, nullable=False)
     is_fixed = Column(Boolean, default=False, nullable=False)
     topic_id = Column(Integer, ForeignKey('topics.id', ondelete='CASCADE'), nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     rating = column_property(
         select(func.coalesce(func.sum(UserRatesComment.rating), 0))
         .filter(UserRatesComment.comment_id == id)
@@ -125,7 +125,7 @@ class Topic(DbBaseModel):
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
     is_fixed = Column(Boolean, default=False, nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     rating = column_property(
         select(func.coalesce(func.sum(UserRatesTopic.rating), 0))
         .filter(UserRatesTopic.topic_id == id)
