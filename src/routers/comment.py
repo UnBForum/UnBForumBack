@@ -67,7 +67,6 @@ def delete_comment(
 
 @comment_router.post(
     '/{comment_id:int}/fix',
-    response_model=CommentRetrieveSchema,
     dependencies=[Security(check_permission, scopes=[Role.moderator, Role.administrator])]
 )
 def fix_comment(
@@ -76,8 +75,8 @@ def fix_comment(
         db_session: Session = Depends(get_db_session)
 ):
     comment = get_comment_or_raise_exception(comment_id, topic_id, db_session)
-    comment.update(db_session, is_fixed=True)
-    return comment
+    comment.update(db_session, is_fixed=not comment.is_fixed)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @comment_router.post('/{comment_id:int}/upvote', response_model=CommentRatingSchema)
