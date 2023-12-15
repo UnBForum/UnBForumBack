@@ -71,10 +71,10 @@ class User(DbBaseModel):
 
     tags = relationship('Tag', secondary=USER_has_TAG, back_populates='users')
     topics = relationship('Topic', back_populates='author')
-    rated_topics = relationship('UserRatesTopic', back_populates='user')
+    rated_topics = relationship('UserRatesTopic', back_populates='user', cascade='all, delete-orphan')
     saved_topics = relationship('Topic', secondary=USER_saves_TOPIC, back_populates='saved_by')
     comments = relationship('Comment', back_populates='author')
-    rated_comments = relationship('UserRatesComment', back_populates='user')
+    rated_comments = relationship('UserRatesComment', back_populates='user', cascade='all, delete-orphan')
 
 
 class Tag(DbBaseModel):
@@ -104,7 +104,7 @@ class Comment(DbBaseModel):
     author = relationship('User', back_populates='comments')
     files = relationship('File', back_populates='comment')
     topic = relationship('Topic', back_populates='comments')
-    rated_by = relationship('UserRatesComment', back_populates='comment')
+    rated_by = relationship('UserRatesComment', back_populates='comment', cascade='all, delete-orphan')
 
     def get_current_user_rating(self, db_session: Session, user_id: int) -> int:
         user_rating = db_session.query(UserRatesComment).filter_by(
@@ -148,7 +148,7 @@ class Topic(DbBaseModel):
     )
     categories = relationship('Category', secondary=TOPIC_has_CATEGORY, back_populates='topics')
     saved_by = relationship('User', secondary=USER_saves_TOPIC, back_populates='saved_topics')
-    rated_by = relationship('UserRatesTopic', back_populates='topic')
+    rated_by = relationship('UserRatesTopic', back_populates='topic', cascade='all, delete-orphan')
 
     def get_current_user_rating(self, db_session: Session, user_id: int) -> int:
         user_rating = db_session.query(UserRatesTopic).filter_by(
