@@ -8,7 +8,7 @@ Feature: Criar Comentário
         And Um tópico com id 1
         When O endpoint "POST /topics/1/comments/" é chamado com o conteúdo <content>
         Then O status da resposta é "201"
-        And O comentário criado possui o conteúdo <content>
+        And O comentário é criado com o conteúdo <content>
         Examples:
             | content                |
             | Conteúdo do comentário |
