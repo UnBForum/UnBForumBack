@@ -43,7 +43,7 @@ def get_comment(topic_id: int, comment_id: int, db_session: Session = Depends(ge
     comment = get_comment_or_raise_exception(comment_id, topic_id, db_session)
     return comment
 
-@comment_router.put('/{comment_id:int}')
+@comment_router.put('/{comment_id:int}', response_model=CommentRetrieveSchema)
 def update_comment(
         topic_id: int,
         comment_id: int,
@@ -65,7 +65,6 @@ def update_comment(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Erro ao atualizar o comentário',
         )
-
 
 
 @comment_router.delete('/{comment_id:int}')
