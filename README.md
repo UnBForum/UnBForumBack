@@ -6,13 +6,13 @@ O UnBFórum é um fórum de discussão *online* cujo como objetivo é facilitar 
 
 Para atingir esse objetivo, a construção do fórum orientou-se por critérios qualitativos fundamentais para a elaboração de fóruns de discussão. Além disso, a aplicação utilizou a Teoria dos Grafos para estruturar a relação entre tópicos e categorias, por meio de um grafo bipartido.
 
-## UnBFórumBack
+## UnBForumBack
 
 Este repositório consiste no desenvolvimento do backend do UnBFórum, utilizando a linguagem de programação Python e o framework FastAPI.
 
 A documentação do backend está disponível em: https://unbforum-backend-4b05406a8bbf.herokuapp.com/docs ou https://unbforum-backend-4b05406a8bbf.herokuapp.com/redoc
 
-## Como rodar
+## Como rodar a API
 
 ### Pré-Requisitos
 
@@ -40,6 +40,12 @@ docker-compose -f docker-compose.yml up --build -d
 
 4. Acesse o endereço http://localhost:8000/docs ou http://localhost:8000/redoc para visualizar a documentação da API
 
+## Como rodar os testes
+
+Para rodar os testes, execute o seguinte comando, estando dentro da pasta do projeto:
+```bash
+sh scripts/run_tests.sh
+```
 
 ## Autores
 
