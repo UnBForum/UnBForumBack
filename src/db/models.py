@@ -70,10 +70,10 @@ class User(DbBaseModel):
     password = Column(String, nullable=False)
 
     tags = relationship('Tag', secondary=USER_has_TAG, back_populates='users')
-    topics = relationship('Topic', back_populates='author')
+    topics = relationship('Topic', back_populates='author', cascade='all, delete-orphan')
     rated_topics = relationship('UserRatesTopic', back_populates='user', cascade='all, delete-orphan')
     saved_topics = relationship('Topic', secondary=USER_saves_TOPIC, back_populates='saved_by')
-    comments = relationship('Comment', back_populates='author')
+    comments = relationship('Comment', back_populates='author', cascade='all, delete-orphan')
     rated_comments = relationship('UserRatesComment', back_populates='user', cascade='all, delete-orphan')
 
 
@@ -102,7 +102,7 @@ class Comment(DbBaseModel):
     )
 
     author = relationship('User', back_populates='comments')
-    files = relationship('File', back_populates='comment')
+    files = relationship('File', back_populates='comment', cascade='all, delete-orphan')
     topic = relationship('Topic', back_populates='comments')
     rated_by = relationship('UserRatesComment', back_populates='comment', cascade='all, delete-orphan')
 
@@ -139,12 +139,13 @@ class Topic(DbBaseModel):
         .scalar_subquery()
     )
 
-    files = relationship('File', back_populates='topic')
+    files = relationship('File', back_populates='topic', cascade='all, delete-orphan')
     author = relationship('User', back_populates='topics')
     comments = relationship(
         'Comment',
         back_populates='topic',
-        order_by='desc(Comment.is_fixed), desc(Comment.rating), desc(Comment.created_at)'
+        order_by='desc(Comment.is_fixed), desc(Comment.rating), desc(Comment.created_at)',
+        cascade='all, delete-orphan',
     )
     categories = relationship('Category', secondary=TOPIC_has_CATEGORY, back_populates='topics')
     saved_by = relationship('User', secondary=USER_saves_TOPIC, back_populates='saved_topics')
