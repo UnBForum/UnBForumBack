@@ -38,8 +38,7 @@ cd UnBForumBack
 docker-compose -f docker-compose.yml up --build -d
 ```
 
-4. 
-Access the url http://localhost:8000/docs ou http://localhost:8000/redoc to see API documentation.
+4. Access the url http://localhost:8000/docs ou http://localhost:8000/redoc to see API documentation.
 
 ## Como rodar os testes
 
