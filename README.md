@@ -2,47 +2,48 @@
 
 # UnBFórum
 
-O UnBFórum é um fórum de discussão *online* cujo como objetivo é facilitar a busca e o compartilhamento de informações acadêmicas dentro da comunidade da Faculdade do Gama (FGA). 
+UnBFórum is an *online* discussion forum whose objective is to facilitate the search and sharing of academic information within the Faculdade do Gama (FGA) community.
 
-Para atingir esse objetivo, a construção do fórum orientou-se por critérios qualitativos fundamentais para a elaboração de fóruns de discussão. Além disso, a aplicação utilizou a Teoria dos Grafos para estruturar a relação entre tópicos e categorias, por meio de um grafo bipartido.
+To achieve this objective, the construction of the forum was guided by fundamental qualitative criteria for the creation of discussion forums. Furthermore, the application used Graph Theory to structure the relationship between topics and categories, through a bipartite graph.
 
 ## UnBForumBack
 
-Este repositório consiste no desenvolvimento do backend do UnBFórum, utilizando a linguagem de programação Python e o framework FastAPI.
+This repository consists of the development of the UnBFórum backend, using the Python programming language and the FastAPI framework.
 
-A documentação do backend está disponível em: https://unbforum-backend-4b05406a8bbf.herokuapp.com/docs ou https://unbforum-backend-4b05406a8bbf.herokuapp.com/redoc
+Backend documentation is available at: https://unbforum-backend-4b05406a8bbf.herokuapp.com/docs or https://unbforum-backend-4b05406a8bbf.herokuapp.com/redoc
 
 ## Como rodar a API
 
 ### Pré-Requisitos
 
-Para executar o projeto, é necessário ter instalado em sua máquina as seguintes ferramentas:
+To run the project, you must have the following tools installed on your machine:
 
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
 ### Executando o projeto
 
-1. Clone o repositório
+1. Clone the repository
 ```bash
 git clone https://github.com/UnBForum/UnBForumBack.git
 ```
 
-2. Entre na pasta do projeto
+2. Enter the project folder
 ```bash
 cd UnBForumBack
 ```
 
-3. Execute o docker-compose
+3. Execute docker-compose
 ```bash
 docker-compose -f docker-compose.yml up --build -d
 ```
 
-4. Acesse o endereço http://localhost:8000/docs ou http://localhost:8000/redoc para visualizar a documentação da API
+4. 
+Access the url http://localhost:8000/docs ou http://localhost:8000/redoc to see API documentation.
 
 ## Como rodar os testes
 
-Para rodar os testes, execute o seguinte comando, estando dentro da pasta do projeto:
+To run the tests, run the following command, located inside the project folder:
 ```bash
 sh scripts/run_tests.sh
 ```
