@@ -12,16 +12,14 @@ This repository consists of the development of the UnBFórum backend, using the 
 
 Backend documentation is available at: https://unbforum-backend-4b05406a8bbf.herokuapp.com/docs or https://unbforum-backend-4b05406a8bbf.herokuapp.com/redoc
 
-## Como rodar a API
-
-### Pré-Requisitos
+## How to execute the API
 
 To run the project, you must have the following tools installed on your machine:
 
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-### Executando o projeto
+### Running the project
 
 1. Clone the repository
 ```bash
@@ -40,7 +38,7 @@ docker-compose -f docker-compose.yml up --build -d
 
 4. Access the url http://localhost:8000/docs ou http://localhost:8000/redoc to see API documentation.
 
-## Como rodar os testes
+## How to execute the tests
 
 To run the tests, run the following command, located inside the project folder:
 ```bash
