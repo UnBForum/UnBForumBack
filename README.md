@@ -47,7 +47,7 @@ To run the tests, run the following command, located inside the project folder:
 sh scripts/run_tests.sh
 ```
 
-## Autores
+## Authors
 
 | ![Herick Portugues](https://github.com/herickport.png?size=96) | ![Lucas Boaventura](https://github.com/lboaventura25.png?size=96) |
 |----------------------------------------------------------------|-------------------------------------------------------------------|
